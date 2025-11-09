@@ -30,3 +30,14 @@ spring:
     level:
       org.hibernate.SQL: debug
       org.hibernate.orm.jdbc.bind: trace
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          #health만 보여줄 수 있도록 정하기
+          include: health
+    endpoint:
+      health:
+        #상세정보 보여주기
+        show-details: always
