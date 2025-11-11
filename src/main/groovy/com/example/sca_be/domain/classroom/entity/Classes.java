@@ -1,12 +1,16 @@
 package com.example.sca_be.domain.classroom.entity;
 
 import com.example.sca_be.domain.auth.entity.Member;
+import com.example.sca_be.domain.auth.entity.Student;
 import com.example.sca_be.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "classes")
@@ -36,6 +40,9 @@ public class Classes extends BaseTimeEntity {
 
     @Column(length = 100)
     private String description;
+
+    @OneToMany(mappedBy = "classes")
+    private List<Student> students = new ArrayList<>();
 
     @Builder
     public Classes(Member teacher, String className, String inviteCode, String grade, String subject, String description) {

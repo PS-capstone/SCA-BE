@@ -38,6 +38,10 @@ public class Member extends BaseTimeEntity {
     
     //created at는 자동생성
 
+    //이걸로 memger 객체에서 .getStudent()로 학생 정보 접근 가능
+    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Student student;
+
     @Builder
     public Member(String username, String password, String realName, String nickname, String email) {
         this.username = username;
