@@ -27,6 +27,9 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}") // Access Token 만료 시간 (milliseconds)
     private long expirationTime;
 
+    @Value("${jwt.refresh-expiration}") // Refresh Token 만료 시간 (milliseconds)
+    private long refreshExpirationTime;
+
     private Key key;
 
     private final CustomUserDetailsService userDetailsService;
@@ -38,13 +41,13 @@ public class JwtTokenProvider {
     }
 
     //login 성공 시 access token 생성
-    public String createToken(Integer memberId, String email) {
+    public String createToken(Integer memberId, String username) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationTime);
 
         return Jwts.builder()
-                .setSubject(email) // 토큰의 주체 (로그인 email)
-                .claim("memberId", memberId) // 2. [변경점] Member 엔티티에 맞춰 Long -> Integer
+                .setSubject(username) // 토큰의 주체 (로그인 username)
+                .claim("memberId", memberId)
                 .setIssuedAt(now) // 토큰 발행 시간
                 .setExpiration(expiry) // 토큰 만료 시간
                 .signWith(key, SignatureAlgorithm.HS256) // 사용할 암호화 알고리즘
@@ -53,25 +56,25 @@ public class JwtTokenProvider {
 
     //인증 정보 추출
     public Authentication getAuthentication(String token) {
-        // 토큰에서 email(Subject)을 가져온다.
-        String email = getEmail(token);
+        // 토큰에서 username(Subject)을 가져온다.
+        String username = getUsername(token);
 
         // CustomUserDetailsService를 사용해 DB에서 실제 사용자 정보를 로드.
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         // Spring Security가 이해하는 Authentication 객체를 생성하여 반환(안에 권한 들어 있음)
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    //토큰에서 이메일 추출
-    public String getEmail(String token) {
+    //토큰에서 username 추출
+    public String getUsername(String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build()
                     .parseClaimsJws(token)
                     .getBody()
                     .getSubject();
         } catch (ExpiredJwtException e) {
-            // 토큰이 만료되어도 email 정보는 가져올 수 있음
+            // 토큰이 만료되어도 username 정보는 가져올 수 있음
             return e.getClaims().getSubject();
         }
     }
@@ -100,5 +103,25 @@ public class JwtTokenProvider {
             log.warn("JWT 토큰이 잘못되었습니다.");
         }
         return false;
+    }
+
+    // Refresh Token 생성
+    public String createRefreshToken(Integer memberId, String username) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + refreshExpirationTime);
+
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("memberId", memberId)
+                .claim("tokenType", "refresh")
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // Access Token 만료 시간 반환 (초 단위)
+    public long getExpirationTime() {
+        return expirationTime / 1000;
     }
 }

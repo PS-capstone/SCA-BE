@@ -12,13 +12,13 @@ import java.util.Collections;
 
 public class CustomUserDetails implements UserDetails {
     private final Integer memberId;
-    private final String email;
+    private final String username;
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(Member member) {
         this.memberId = member.getMemberId();
-        this.email = member.getEmail();
+        this.username = member.getUsername();
         this.password = member.getPassword();
 
         // "ROLE_" + "TEACHER" 또는 "ROLE_" + "STUDENT"
@@ -45,8 +45,8 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        // 계정의 식별자(로그인 ID) 반환 (우리는 email 사용)
-        return this.email;
+        // 계정의 식별자(로그인 ID) 반환
+        return this.username;
     }
 
     // --- 계정 상태 관련 메서드 ---

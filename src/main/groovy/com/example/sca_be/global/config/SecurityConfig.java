@@ -63,8 +63,10 @@ public class SecurityConfig {
                                 "/api/auth/login",            // 로그인
                                 "/api/auth/refresh",          // 토큰 재발급
                                 "/swagger-ui/**",
+                                "/h2-console/**",
+                                "/favicon.ico",     //개발 용 database 접속
                                 "/v3/api-docs/**", //api 문서
-                                "/actuator/health" //health check
+                                "/actuator/health"//health check
                         ).permitAll()
 
                         //  'TEACHER' 권한이 필요한 경로
@@ -102,6 +104,9 @@ public class SecurityConfig {
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class
+                )
+                .headers(headers ->
+                        headers.frameOptions(frameOptions -> frameOptions.sameOrigin())
                 )
 
                 .build();
