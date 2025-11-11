@@ -1,6 +1,6 @@
 package com.example.sca_be.domain.groupquest.entity;
 
-import com.example.sca_be.domain.auth.entity.Member;
+import com.example.sca_be.domain.auth.entity.Teacher;
 import com.example.sca_be.domain.classroom.entity.Classes;
 import com.example.sca_be.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -25,7 +25,7 @@ public class GroupQuest extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id")
-    private Member teacher;
+    private Teacher teacher;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_id")
@@ -38,16 +38,11 @@ public class GroupQuest extends BaseTimeEntity {
     @Column(length = 20)
     private GroupQuestStatus status;
 
-
-    // ... (기존 필드: rewardCoral, rewardResearchData, startDate, endDate, content 등)
     @Column(name = "reward_coral")
     private Integer rewardCoral;
 
     @Column(name = "reward_research_data")
     private Integer rewardResearchData;
-
-    @Column(name = "start_date")
-    private LocalDateTime startDate;
 
     @Column(name = "end_date")
     private LocalDateTime endDate;
@@ -67,16 +62,15 @@ public class GroupQuest extends BaseTimeEntity {
 
 
     @Builder
-    public GroupQuest(Member teacher, Classes classes, String title, GroupQuestStatus status, Integer rewardCoral, Integer rewardResearchData, LocalDateTime startDate, LocalDateTime endDate, String content, GroupQuestTemplate type) { // 'type' 추가
+    public GroupQuest(Teacher teacher, Classes classes, String title, GroupQuestStatus status, Integer rewardCoral, Integer rewardResearchData, LocalDateTime endDate, String content, GroupQuestTemplate type) {
         this.teacher = teacher;
         this.classes = classes;
         this.title = title;
         this.status = status;
         this.rewardCoral = rewardCoral;
         this.rewardResearchData = rewardResearchData;
-        this.startDate = startDate;
         this.endDate = endDate;
         this.content = content;
-        this.type = type; // 'type' 초기화
+        this.type = type;
     }
 }

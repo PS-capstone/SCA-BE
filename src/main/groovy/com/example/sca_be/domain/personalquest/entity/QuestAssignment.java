@@ -1,6 +1,6 @@
 package com.example.sca_be.domain.personalquest.entity;
 
-import com.example.sca_be.domain.auth.entity.Member;
+import com.example.sca_be.domain.auth.entity.Student;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -23,7 +23,7 @@ public class QuestAssignment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", unique = true)
-    private Member student;
+    private Student student;
 
     @Column(name = "reward_coral_personal")
     private Integer rewardCoralPersonal;
@@ -36,7 +36,7 @@ public class QuestAssignment {
     private Submission submission;
 
     @Builder
-    public QuestAssignment(Quest quest, Member student, Integer rewardCoralPersonal, Integer rewardResearchDataPersonal) {
+    public QuestAssignment(Quest quest, Student student, Integer rewardCoralPersonal, Integer rewardResearchDataPersonal) {
         this.quest = quest;
         this.student = student;
         this.rewardCoralPersonal = rewardCoralPersonal;

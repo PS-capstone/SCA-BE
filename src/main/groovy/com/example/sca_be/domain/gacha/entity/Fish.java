@@ -26,6 +26,8 @@ public class Fish {
     @Column(length = 20)
     private FishGrade grade;
 
+
+
     @OneToMany(mappedBy = "fish")
     private List<CollectionEntry> collectionEntries = new ArrayList<>();
 }

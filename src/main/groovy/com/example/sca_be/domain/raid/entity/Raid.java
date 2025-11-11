@@ -1,6 +1,6 @@
 package com.example.sca_be.domain.raid.entity;
 
-import com.example.sca_be.domain.auth.entity.Member;
+import com.example.sca_be.domain.auth.entity.Teacher;
 import com.example.sca_be.domain.classroom.entity.Classes;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -24,7 +24,7 @@ public class Raid {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id")
-    private Member teacher;
+    private Teacher teacher;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_id")
@@ -65,7 +65,7 @@ public class Raid {
     private List<Contribution> contributions = new ArrayList<>();
 
     @Builder
-    public Raid(Member teacher, Classes classes, LocalDateTime startDate, LocalDateTime endDate, Long totalBossHp, Long currentBossHp, Integer rewardCoral, String specialRewardDescription, RaidStatus status, Difficulty difficulty, RaidTemplate bossType) {
+    public Raid(Teacher teacher, Classes classes, LocalDateTime startDate, LocalDateTime endDate, Long totalBossHp, Long currentBossHp, Integer rewardCoral, String specialRewardDescription, RaidStatus status, Difficulty difficulty, RaidTemplate bossType) {
         this.teacher = teacher;
         this.classes = classes;
         this.startDate = startDate;

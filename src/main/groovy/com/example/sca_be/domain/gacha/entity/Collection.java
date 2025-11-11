@@ -1,6 +1,6 @@
 package com.example.sca_be.domain.gacha.entity;
 
-import com.example.sca_be.domain.auth.entity.Member;
+import com.example.sca_be.domain.auth.entity.Student;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,13 +22,13 @@ public class Collection {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", unique = true)
-    private Member student;
+    private Student student;
 
     @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CollectionEntry> collectionEntries = new ArrayList<>();
 
     @Builder
-    public Collection(Member student) {
+    public Collection(Student student) {
         this.student = student;
     }
 }

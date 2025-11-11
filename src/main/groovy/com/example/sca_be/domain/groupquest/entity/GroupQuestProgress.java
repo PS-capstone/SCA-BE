@@ -1,6 +1,7 @@
 package com.example.sca_be.domain.groupquest.entity;
 
-import com.example.sca_be.domain.auth.entity.Member;
+
+import com.example.sca_be.domain.auth.entity.Student;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -31,7 +32,7 @@ public class GroupQuestProgress {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
-    private Member student;
+    private Student student;
 
     @Column(name = "is_completed")
     private Boolean isCompleted;
@@ -40,7 +41,7 @@ public class GroupQuestProgress {
     private LocalDateTime completedAt;
 
     @Builder
-    public GroupQuestProgress(GroupQuest groupQuest, Member student, Boolean isCompleted) {
+    public GroupQuestProgress(GroupQuest groupQuest, Student student, Boolean isCompleted) {
         this.groupQuest = groupQuest;
         this.student = student;
         this.isCompleted = (isCompleted != null) ? isCompleted : false;

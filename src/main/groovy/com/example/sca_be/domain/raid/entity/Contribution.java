@@ -1,6 +1,6 @@
 package com.example.sca_be.domain.raid.entity;
 
-import com.example.sca_be.domain.auth.entity.Member;
+import com.example.sca_be.domain.auth.entity.Student;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contributions",
-        uniqueConstraints = { // (명세서 'student_id (1:1)' 오류 수정 -> 복합 유니크 키)
+        uniqueConstraints = {
                 @UniqueConstraint(
                         columnNames = {"raid_id", "student_id"}
                 )
@@ -34,7 +34,7 @@ public class Contribution {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
-    private Member student;
+    private Student student;
 
     @Column(nullable = false)
     private Integer damage = 0; // (Default: 0)
@@ -44,7 +44,7 @@ public class Contribution {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Contribution(Raid raid, Member student, Integer damage) {
+    public Contribution(Raid raid, Student student, Integer damage) {
         this.raid = raid;
         this.student = student;
         this.damage = (damage != null) ? damage : 0;

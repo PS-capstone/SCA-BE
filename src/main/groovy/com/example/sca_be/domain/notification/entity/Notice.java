@@ -1,4 +1,6 @@
 package com.example.sca_be.domain.notification.entity;
+import com.example.sca_be.domain.auth.entity.Student;
+import com.example.sca_be.domain.personalquest.entity.Quest;
 import com.example.sca_be.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -20,6 +22,14 @@ public class Notice extends BaseTimeEntity {
     @Column(name = "notice_type", length = 50)
     private NoticeType noticeType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id")
+    private Student student;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quest_id")
+    private Quest quest;
+
     @Column(length = 255)
     private String title;
 
@@ -27,9 +37,11 @@ public class Notice extends BaseTimeEntity {
     private String content;
 
     @Builder
-    public Notice(NoticeType noticeType, String title, String content) {
+    public Notice(NoticeType noticeType, String title, String content, Student student, Quest quest) {
         this.noticeType = noticeType;
         this.title = title;
         this.content = content;
+        this.student = student;
+        this.quest = quest;
     }
 }

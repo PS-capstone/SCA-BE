@@ -1,5 +1,6 @@
 package com.example.sca_be.domain.personalquest.entity;
 
+import com.example.sca_be.domain.auth.entity.Teacher;
 import com.example.sca_be.global.common.BaseTimeEntity;
 import com.example.sca_be.domain.auth.entity.Member;
 import com.example.sca_be.domain.personalquest.entity.QuestAssignment;
@@ -25,7 +26,7 @@ public class Quest extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id")
-    private Member teacher;
+    private Teacher teacher;
 
     @Column(nullable = false, length = 255)
     private String title;
@@ -38,9 +39,6 @@ public class Quest extends BaseTimeEntity {
     @Column(length = 20)
     private QuestStatus status;
 
-    @Column(name = "assigned_at")
-    private LocalDateTime assignedAt;
-
     @Column(name = "reward_coral_default")
     private Integer rewardCoralDefault;
 
@@ -52,12 +50,11 @@ public class Quest extends BaseTimeEntity {
     private List<QuestAssignment> questAssignments = new ArrayList<>();
 
     @Builder
-    public Quest(Member teacher, String title, String teacherContent, QuestStatus status, LocalDateTime assignedAt, Integer rewardCoralDefault, Integer rewardResearchDataDefault) {
+    public Quest(Teacher teacher, String title, String teacherContent, QuestStatus status, Integer rewardCoralDefault, Integer rewardResearchDataDefault) {
         this.teacher = teacher;
         this.title = title;
         this.teacherContent = teacherContent;
         this.status = status;
-        this.assignedAt = assignedAt;
         this.rewardCoralDefault = rewardCoralDefault;
         this.rewardResearchDataDefault = rewardResearchDataDefault;
     }

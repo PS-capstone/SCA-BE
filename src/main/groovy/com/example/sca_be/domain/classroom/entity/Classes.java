@@ -1,7 +1,7 @@
 package com.example.sca_be.domain.classroom.entity;
 
-import com.example.sca_be.domain.auth.entity.Member;
 import com.example.sca_be.domain.auth.entity.Student;
+import com.example.sca_be.domain.auth.entity.Teacher;
 import com.example.sca_be.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -24,7 +24,7 @@ public class Classes extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id")
-    private Member teacher;
+    private Teacher teacher;
 
     @Column(name = "class_name", nullable = false, length = 100)
     private String className;
@@ -45,7 +45,7 @@ public class Classes extends BaseTimeEntity {
     private List<Student> students = new ArrayList<>();
 
     @Builder
-    public Classes(Member teacher, String className, String inviteCode, String grade, String subject, String description) {
+    public Classes(Teacher teacher, String className, String inviteCode, String grade, String subject, String description) {
         this.teacher = teacher;
         this.className = className;
         this.inviteCode = inviteCode;

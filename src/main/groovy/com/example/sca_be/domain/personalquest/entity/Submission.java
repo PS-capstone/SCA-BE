@@ -32,7 +32,8 @@ public class Submission {
     @Column(name = "submitted_at", updatable = false)
     private LocalDateTime submittedAt;
 
-    @Column(length = 255)
+    @Lob
+    @Column(name = "comment")
     private String comment;
 
     @Lob
