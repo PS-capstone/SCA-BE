@@ -127,7 +127,7 @@ class SecurityIntegrationTest {
         classesRepository.deleteAll();
     }
 
-    /*@Test
+    @Test
     @DisplayName("인증 없이 공개 API 접근 성공")
     void accessPublicEndpoint_WithoutAuth_Success() throws Exception {
         // given
@@ -306,7 +306,7 @@ class SecurityIntegrationTest {
         assertThat(response).contains("security_teacher");
         assertThat(response).contains("ROLE_TEACHER");
         assertThat(response).contains("accessToken");
-    }*/
+    }
 
     private static org.assertj.core.api.AbstractStringAssert<?> assertThat(String actual) {
         return org.assertj.core.api.Assertions.assertThat(actual);
