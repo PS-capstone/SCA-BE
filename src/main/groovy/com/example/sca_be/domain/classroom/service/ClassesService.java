@@ -45,14 +45,13 @@ public class ClassesService {
                 .map(c -> {
                     int studentCount = studentRepository.countByClasses(c);
 
-                    int ongoingQuestCount = random.nextInt(4) + 2;//이거 나중에 퀘스트 관련 로직 잡고 고쳐야 함
+                    int waitingQuestCount = 0;//이거 나중에 퀘스트 관련 로직 잡고 고쳐야 함
 
                     return ClassListResponse.ClassSummary.builder()
                             .classId(c.getClassId())
                             .className(c.getClassName())
                             .studentCount(studentCount)
-                            .ongoingQuestCount(ongoingQuestCount)
-                            .createdAt(c.getCreatedAt().format(DateTimeFormatter.ISO_DATE_TIME))
+                            .waitingQuestCount(waitingQuestCount)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -79,6 +78,7 @@ public class ClassesService {
                 .inviteCode(inviteCode)
                 .grade(request.getGrade())
                 .subject(request.getSubject())
+                .description(request.getDescription())
                 .build();
 
         Classes savedClass = classesRepository.save(classes);

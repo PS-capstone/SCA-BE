@@ -1,5 +1,6 @@
 package com.example.sca_be.domain.classroom.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,10 +20,13 @@ public class ClassListResponse {
     @Builder
     @AllArgsConstructor
     public static class ClassSummary {
+        @JsonProperty("class_id")
         private Integer classId;
+        @JsonProperty("class_name")
         private String className;
+        @JsonProperty("student_count")
         private Integer studentCount;
-        private Integer ongoingQuestCount;  // 임시 하드코딩될 필드
-        private String createdAt;
+        @JsonProperty("waiting_quest_count")
+        private Integer waitingQuestCount;  // 대기 중인 퀘스트 수
     }
 }
