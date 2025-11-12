@@ -100,6 +100,21 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    //404 리소스 못 찾음 (Spring 6.0+의 NoResourceFoundException 처리)
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResourceFoundException(
+            org.springframework.web.servlet.resource.NoResourceFoundException e) {
+
+        log.warn("Resource not found: {}", e.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(
+                        "NOT_FOUND",
+                        "요청한 리소스를 찾을 수 없습니다."
+                ));
+    }
+
     //런타임 에러
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException e) {
