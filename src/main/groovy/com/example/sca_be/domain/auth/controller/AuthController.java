@@ -3,6 +3,7 @@ package com.example.sca_be.domain.auth.controller;
 import com.example.sca_be.domain.auth.dto.*;
 import com.example.sca_be.domain.auth.service.AuthService;
 import com.example.sca_be.global.common.ApiResponse;
+import com.example.sca_be.global.common.ApiVersion;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping(ApiVersion.AUTH)
 @RequiredArgsConstructor
 public class AuthController {
 

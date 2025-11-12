@@ -35,10 +35,6 @@ public class Quest extends BaseTimeEntity {
     @Column(name = "teacher_content")
     private String teacherContent;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private QuestStatus status;
-
     @Column(name = "reward_coral_default")
     private Integer rewardCoralDefault;
 
@@ -50,11 +46,10 @@ public class Quest extends BaseTimeEntity {
     private List<QuestAssignment> questAssignments = new ArrayList<>();
 
     @Builder
-    public Quest(Teacher teacher, String title, String teacherContent, QuestStatus status, Integer rewardCoralDefault, Integer rewardResearchDataDefault) {
+    public Quest(Teacher teacher, String title, String teacherContent, Integer rewardCoralDefault, Integer rewardResearchDataDefault) {
         this.teacher = teacher;
         this.title = title;
         this.teacherContent = teacherContent;
-        this.status = status;
         this.rewardCoralDefault = rewardCoralDefault;
         this.rewardResearchDataDefault = rewardResearchDataDefault;
     }

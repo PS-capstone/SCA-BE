@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,6 +27,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity // Spring Security 설정을 활성화합니다.
+@EnableMethodSecurity // @PreAuthorize, @Secured 등의 메서드 시큐리티 어노테이션을 활성화합니다.
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -58,20 +60,21 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 접근 허용할 경로
                         .requestMatchers(
-                                "/api/auth/teacher/signup",   // 선생님 회원가입
-                                "/api/auth/student/signup",   // 학생 회원가입
-                                "/api/auth/login",            // 로그인
-                                "/api/auth/refresh",          // 토큰 재발급
+                                "/api/v1/auth/teacher/signup",   // 선생님 회원가입
+                                "/api/v1/auth/student/signup",   // 학생 회원가입
+                                "/api/v1/auth/login",            // 로그인
+                                "/api/v1/auth/refresh",          // 토큰 재발급
                                 "/swagger-ui/**",
                                 "/h2-console/**",
                                 "/favicon.ico",     //개발 용 database 접속
                                 "/v3/api-docs/**", //api 문서
-                                "/actuator/health"//health check
+                                "/actuator/health",
+                                "/api/actuator/health"//health check
                         ).permitAll()
 
                         //  'TEACHER' 권한이 필요한 경로
                         .requestMatchers(
-                                "/api/classes/**",                        // 반 생성, 조회, 학생 목록
+                                "/api/v1/classes/**",                        // 반 생성, 조회, 학생 목록
                                 "/api/quests/personal/ai-recommend",      // AI 보상 추천 받기
                                 "/api/quests/personal/pending",           // 개인 퀘스트 승인 대기 목록
                                 "/api/quests/personal/{questId}/detail",  // 개인 퀘스트 상세(제출 내용 포함)

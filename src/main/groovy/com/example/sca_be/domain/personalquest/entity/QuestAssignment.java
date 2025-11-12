@@ -31,15 +31,20 @@ public class QuestAssignment {
     @Column(name = "reward_research_data_personal")
     private Integer rewardResearchDataPersonal;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private QuestStatus status;
+
     //할당에 대한 결과물 참조
     @OneToOne(mappedBy = "questAssignment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Submission submission;
 
     @Builder
-    public QuestAssignment(Quest quest, Student student, Integer rewardCoralPersonal, Integer rewardResearchDataPersonal) {
+    public QuestAssignment(Quest quest, Student student, Integer rewardCoralPersonal, Integer rewardResearchDataPersonal, QuestStatus status) {
         this.quest = quest;
         this.student = student;
         this.rewardCoralPersonal = rewardCoralPersonal;
         this.rewardResearchDataPersonal = rewardResearchDataPersonal;
+        this.status = status;
     }
 }
