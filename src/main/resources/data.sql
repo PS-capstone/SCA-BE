@@ -4,17 +4,22 @@
 
 -- 1. Fish (Master Data) - Fish available through gacha
 -- fish_id is auto-generated
-INSERT INTO fish (fish_name, grade) VALUES
-('Tropical Fish', 'COMMON'),
-('Goldfish', 'COMMON'),
-('Guppy', 'COMMON'),
-('Neon Tetra', 'COMMON'),
-('Clownfish', 'RARE'),
-('Seahorse', 'RARE'),
-('Pufferfish', 'RARE'),
-('Stingray', 'RARE'),
-('Shark', 'LEGENDARY'),
-('Orca', 'LEGENDARY');
+-- Probability calculation:
+-- COMMON (70%): 4 fish -> 70/4 = 17.5% each
+-- RARE (25%): 4 fish -> 25/4 = 6.25% each
+-- LEGENDARY (5%): 2 fish -> 5/2 = 2.5% each
+-- Total: 100%
+INSERT INTO fish (fish_name, grade, probability) VALUES
+('Tropical Fish', 'COMMON', 0.175),
+('Goldfish', 'COMMON', 0.175),
+('Guppy', 'COMMON', 0.175),
+('Neon Tetra', 'COMMON', 0.175),
+('Clownfish', 'RARE', 0.0625),
+('Seahorse', 'RARE', 0.0625),
+('Pufferfish', 'RARE', 0.0625),
+('Stingray', 'RARE', 0.0625),
+('Shark', 'LEGENDARY', 0.025),
+('Orca', 'LEGENDARY', 0.025);
 
 -- 2. Members (User Base Info) - 3 Teachers, 10 Students
 -- member_id is auto-generated

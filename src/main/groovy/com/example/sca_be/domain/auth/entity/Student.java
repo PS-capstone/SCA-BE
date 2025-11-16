@@ -59,6 +59,22 @@ public class Student {
         this.researchData = (this.researchData != null ? this.researchData : 0) + amount;
     }
 
+    // 코랄 차감 메서드
+    public void deductCoral(Integer amount) {
+        if (this.coral == null) {
+            this.coral = 0;
+        }
+        if (this.coral < amount) {
+            throw new IllegalStateException("보유 코랄이 부족합니다.");
+        }
+        this.coral -= amount;
+    }
+
+    // 코랄 보유 여부 확인
+    public boolean hasSufficientCoral(Integer amount) {
+        return this.coral != null && this.coral >= amount;
+    }
+
     // Classes getter 메서드 이름 수정 (Service에서 사용)
     public Classes getClassEntity() {
         return this.classes;

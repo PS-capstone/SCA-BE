@@ -30,12 +30,13 @@ public enum ErrorCode {
     // ===== 비즈니스 로직 오류 (400) =====
     INVALID_INPUT("입력값이 올바르지 않습니다."),
     QUEST_EXPIRED("마감일이 지난 퀘스트입니다."),
-    INSUFFICIENT_CORAL("코랄이 부족합니다."),
+    INSUFFICIENT_CORAL("보유 코랄이 부족합니다."),
     INSUFFICIENT_RESEARCH_DATA("연구 자료가 부족합니다."),
     INVALID_QUEST_STATUS("퀘스트 상태가 올바르지 않습니다."),
     CANNOT_MODIFY_APPROVED_QUEST("승인된 퀘스트는 수정할 수 없습니다."),
     GACHA_ALREADY_DRAWN("이미 뽑기를 완료했습니다."),
     INVITE_CODE_GENERATION_FAILED("초대 코드 생성에 실패했습니다."),
+    NO_FISH_AVAILABLE("뽑을 수 있는 물고기가 없습니다."),
 
     // ===== Personal Quest 관련 (400) =====
     TITLE_REQUIRED("제목은 필수입니다."),
