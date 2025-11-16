@@ -37,6 +37,15 @@ public enum ErrorCode {
     GACHA_ALREADY_DRAWN("이미 뽑기를 완료했습니다."),
     INVITE_CODE_GENERATION_FAILED("초대 코드 생성에 실패했습니다."),
 
+    // ===== Personal Quest 관련 (400) =====
+    TITLE_REQUIRED("제목은 필수입니다."),
+    STUDENTS_REQUIRED("최소 1명 이상의 학생을 선택해야 합니다."),
+    AI_REWARD_REQUIRED("AI 사용 시 AI 추천 보상 정보가 필요합니다."),
+    ASSIGNMENT_NOT_FOUND("해당 할당을 찾을 수 없습니다."),
+    ASSIGNMENT_ACCESS_DENIED("해당 퀘스트에 접근 권한이 없습니다."),
+    ASSIGNMENT_NOT_SUBMITTED("제출되지 않은 퀘스트는 승인할 수 없습니다."),
+    NOT_PROCESSED_YET("아직 처리되지 않은 퀘스트입니다."),
+
     // ===== 서버 오류 (500) =====
     INTERNAL_SERVER_ERROR("서버 오류가 발생했습니다."),
     DATABASE_ERROR("데이터베이스 오류가 발생했습니다."),

@@ -39,6 +39,7 @@ public class CustomException extends RuntimeException {
             // 403 Forbidden
             case FORBIDDEN:
             case CLASS_ACCESS_DENIED:
+            case ASSIGNMENT_ACCESS_DENIED:
                 return HttpStatus.FORBIDDEN;
 
             // 404 Not Found
@@ -50,6 +51,7 @@ public class CustomException extends RuntimeException {
             case RAID_NOT_FOUND:
             case GACHA_NOT_FOUND:
             case INVALID_INVITE_CODE:
+            case ASSIGNMENT_NOT_FOUND:
                 return HttpStatus.NOT_FOUND;
 
             // 409 Conflict

@@ -74,28 +74,30 @@ public class SecurityConfig {
 
                         //  'TEACHER' 권한이 필요한 경로
                         .requestMatchers(
-                                "/api/v1/classes/**",                        // 반 생성, 조회, 학생 목록
-                                "/api/quests/personal/ai-recommend",      // AI 보상 추천 받기
-                                "/api/quests/personal/pending",           // 개인 퀘스트 승인 대기 목록
-                                "/api/quests/personal/{questId}/detail",  // 개인 퀘스트 상세(제출 내용 포함)
-                                "/api/quests/personal/{questId}/approve", // 개인 퀘스트 승인
-                                "/api/quests/personal/{questId}/reject",  // 개인 퀘스트 반려
-                                "/api/quests/group/**",                   // 단체 퀘스트 전체 (생성, 조회, 완료, 학생 체크)
-                                "/api/raids/creation-info",               // 레이드 템플릿 조회
-                                "/api/raids",                             // 레이드 생성 (POST)
-                                "/api/raids/{raidId}/detail",             // 레이드 상세 조회 (선생님용)
-                                "/api/raids/{raidId}/terminate"            // 레이드 강제 종료
+                                "/api/v1/classes/**",                              // 반 생성, 조회, 학생 목록
+                                "/api/v1/quests/personal",                         // 개인 퀘스트 생성 및 할당
+                                "/api/v1/quests/personal/ai-recommend",            // AI 보상 추천 받기
+                                "/api/v1/quests/personal/pending",                 // 개인 퀘스트 승인 대기 목록
+                                "/api/v1/quests/personal/{assignmentId}/detail",   // 개인 퀘스트 상세(제출 내용 포함)
+                                "/api/v1/quests/personal/{assignmentId}/approve",  // 개인 퀘스트 승인
+                                "/api/v1/quests/personal/{assignmentId}/reject",   // 개인 퀘스트 반려
+                                "/api/quests/group/**",                            // 단체 퀘스트 전체 (생성, 조회, 완료, 학생 체크)
+                                "/api/raids/creation-info",                        // 레이드 템플릿 조회
+                                "/api/raids",                                      // 레이드 생성 (POST)
+                                "/api/raids/{raidId}/detail",                      // 레이드 상세 조회 (선생님용)
+                                "/api/raids/{raidId}/terminate"                    // 레이드 강제 종료
                         ).hasRole("TEACHER")
 
                         // 'STUDENT' 권한이 필요한 경로
                         .requestMatchers(
-                                "/api/quests/personal/my",                // 내 개인 퀘스트 목록
-                                "/api/quests/personal/{questId}/submit",  // 개인 퀘스트 제출
-                                "/api/students/**",                       // 학생 대시보드, 활동로그, 공지
-                                "/api/gacha/**",                          // 가챠 정보, 뽑기
-                                "/api/collection/**",                     // 수족관, 도감
-                                "/api/raids/my-raid",                     // 내 레이드 조회
-                                "/api/raids/{raidId}/attack"              // 레이드 공격
+                                "/api/v1/quests/personal/my",                      // 내 개인 퀘스트 목록
+                                "/api/v1/quests/personal/{assignmentId}/submit",   // 개인 퀘스트 제출, 재제출
+                                "/api/v1/quests/personal/{assignmentId}/comment",  // 퀘스트 코멘트 조회
+                                "/api/students/**",                                // 학생 대시보드, 활동로그, 공지
+                                "/api/gacha/**",                                   // 가챠 정보, 뽑기
+                                "/api/collection/**",                              // 수족관, 도감
+                                "/api/raids/my-raid",                              // 내 레이드 조회
+                                "/api/raids/{raidId}/attack"                       // 레이드 공격
                         ).hasRole("STUDENT")
 
                         // 그 외 모든 요청은 인증 필요

@@ -47,4 +47,13 @@ public class Submission {
         this.comment = comment;
         this.studentContent = studentContent;
     }
+
+    public void updateContent(String studentContent, String attachmentUrl) {
+        this.studentContent = studentContent;
+        this.attachmentUrl = attachmentUrl;
+    }
+
+    public void updateComment(String comment) {
+        this.comment = comment;
+    }
 }
