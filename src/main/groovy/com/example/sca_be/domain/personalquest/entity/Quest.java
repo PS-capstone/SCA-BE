@@ -41,16 +41,24 @@ public class Quest extends BaseTimeEntity {
     @Column(name = "reward_research_data_default")
     private Integer rewardResearchDataDefault;
 
+    @Column(name = "deadline")
+    private LocalDateTime deadline;
+
+    @Column(name = "difficulty")
+    private Integer difficulty;
+
     // 이 퀘스트가 누구에게 할당되었는지 QuestAssignment를 통해 참조.
     @OneToMany(mappedBy = "quest", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuestAssignment> questAssignments = new ArrayList<>();
 
     @Builder
-    public Quest(Teacher teacher, String title, String teacherContent, Integer rewardCoralDefault, Integer rewardResearchDataDefault) {
+    public Quest(Teacher teacher, String title, String teacherContent, Integer rewardCoralDefault, Integer rewardResearchDataDefault, LocalDateTime deadline, Integer difficulty) {
         this.teacher = teacher;
         this.title = title;
         this.teacherContent = teacherContent;
         this.rewardCoralDefault = rewardCoralDefault;
         this.rewardResearchDataDefault = rewardResearchDataDefault;
+        this.deadline = deadline;
+        this.difficulty = difficulty;
     }
 }

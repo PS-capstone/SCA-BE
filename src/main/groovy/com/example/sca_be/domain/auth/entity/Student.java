@@ -29,7 +29,7 @@ public class Student {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "class_id", unique = true) // 'unique = true' -> 1:1 관계 (학생 1명당 반 1개)
+    @JoinColumn(name = "class_id") // 'unique = true' -> 1:1 관계 (학생 1명당 반 1개)
     private Classes classes;
 
     @ColumnDefault("0")
@@ -48,5 +48,19 @@ public class Student {
     public Student(Member member, Classes classes) {
         this.member = member;
         this.classes = classes;
+    }
+
+    // 보상 지급 메서드
+    public void addCoral(Integer amount) {
+        this.coral = (this.coral != null ? this.coral : 0) + amount;
+    }
+
+    public void addResearchData(Integer amount) {
+        this.researchData = (this.researchData != null ? this.researchData : 0) + amount;
+    }
+
+    // Classes getter 메서드 이름 수정 (Service에서 사용)
+    public Classes getClassEntity() {
+        return this.classes;
     }
 }
