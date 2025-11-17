@@ -10,6 +10,8 @@ import com.example.sca_be.domain.classroom.dto.*;
 import com.example.sca_be.domain.classroom.entity.Classes;
 import com.example.sca_be.domain.classroom.repository.ClassesRepository;
 import com.example.sca_be.domain.classroom.util.InviteCodeGenerator;
+import com.example.sca_be.domain.personalquest.entity.QuestStatus;
+import com.example.sca_be.domain.personalquest.repository.QuestAssignmentRepository;
 import com.example.sca_be.global.exception.CustomException;
 import com.example.sca_be.global.exception.ErrorCode;
 import com.example.sca_be.global.security.principal.CustomUserDetails;
@@ -20,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,7 +33,7 @@ public class ClassesService {
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
     private final MemberRepository memberRepository;
-    private final Random random = new Random();
+    private final QuestAssignmentRepository questAssignmentRepository;
 
     //현재 로그인한 선생님의 반 목록 조회
     public ClassListResponse getClassList() {
@@ -45,7 +46,13 @@ public class ClassesService {
                 .map(c -> {
                     int studentCount = studentRepository.countByClasses(c);
 
-                    int waitingQuestCount = 0;//이거 나중에 퀘스트 관련 로직 잡고 고쳐야 함
+                    // 해당 반의 학생들의 승인 대기 중인 개인 퀘스트 수
+                    int waitingQuestCount = (int) questAssignmentRepository
+                            .findPendingAssignmentsByTeacherAndClass(
+                                    teacher.getMemberId(),
+                                    QuestStatus.SUBMITTED,
+                                    c.getClassId()
+                            ).size();
 
                     return ClassListResponse.ClassSummary.builder()
                             .classId(c.getClassId())
@@ -112,8 +119,12 @@ public class ClassesService {
 
         List<StudentListResponse.StudentInfo> studentInfos = students.stream()
                 .map(s -> {
-
-                    int pendingQuests = random.nextInt(4);//일단 quest 구현 전이어서 랜덤으로 설정
+                    // 해당 학생의 승인 대기 중인 개인 퀘스트 수 (SUBMITTED 상태)
+                    int pendingQuests = (int) questAssignmentRepository
+                            .findByStudentAndStatusIn(
+                                    s.getMemberId(),
+                                    List.of(QuestStatus.SUBMITTED)
+                            ).size();
 
                     return StudentListResponse.StudentInfo.builder()
                             .studentId(s.getMemberId())
