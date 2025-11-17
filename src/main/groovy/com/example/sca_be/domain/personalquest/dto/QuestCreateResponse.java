@@ -22,6 +22,9 @@ public class QuestCreateResponse {
     private Integer difficulty;
     private LocalDateTime deadline;
 
+    @JsonProperty("class_id")
+    private Integer classId;
+
     @JsonProperty("reward_coral_default")
     private Integer rewardCoralDefault;
 

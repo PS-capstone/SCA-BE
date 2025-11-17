@@ -21,6 +21,9 @@ public class QuestCreateRequest {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime deadline;
 
+    @JsonProperty("class_id")
+    private Integer classId;
+
     @JsonProperty("reward_coral_default")
     private Integer rewardCoralDefault;
 

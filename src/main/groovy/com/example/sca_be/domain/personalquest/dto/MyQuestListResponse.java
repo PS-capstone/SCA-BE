@@ -11,14 +11,9 @@ import java.util.List;
 @Getter
 @Builder
 public class MyQuestListResponse {
-    @JsonProperty("active_quests")
-    private List<QuestItem> activeQuests;
+    private String status;
 
-    @JsonProperty("expired_quests")
-    private List<QuestItem> expiredQuests;
-
-    @JsonProperty("approved_quests")
-    private List<QuestItem> approvedQuests;
+    private List<QuestItem> quests;
 
     @JsonProperty("total_count")
     private Integer totalCount;
@@ -50,16 +45,13 @@ public class MyQuestListResponse {
 
         private SubmissionSummary submission;
 
-        @JsonProperty("approved_at")
-        private LocalDateTime approvedAt;
-
-        private String comment;
-
         @Getter
         @Builder
         public static class SubmissionSummary {
             @JsonProperty("submitted_at")
             private LocalDateTime submittedAt;
+
+            private String comment;
         }
     }
 }
