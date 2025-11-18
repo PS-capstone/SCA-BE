@@ -12,8 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 public class ClassListResponse {
 
+    @JsonProperty("teacher_name")
     private String teacherName;
     private List<ClassSummary> classes;
+    @JsonProperty("total_count")
     private Integer totalCount;
 
     @Getter

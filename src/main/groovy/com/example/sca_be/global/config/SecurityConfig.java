@@ -81,8 +81,6 @@ public class SecurityConfig {
                                 "/api/v1/quests/personal/{assignmentId}/detail",   // 개인 퀘스트 상세(제출 내용 포함)
                                 "/api/v1/quests/personal/{assignmentId}/approve",  // 개인 퀘스트 승인
                                 "/api/v1/quests/personal/{assignmentId}/reject",   // 개인 퀘스트 반려
-                                "/api/v1/gacha/**",
-                                "/api/v1/collection/**",
                                 "/api/quests/group/**",                            // 단체 퀘스트 전체 (생성, 조회, 완료, 학생 체크)
                                 "/api/raids/creation-info",                        // 레이드 템플릿 조회
                                 "/api/raids",                                      // 레이드 생성 (POST)
@@ -96,8 +94,8 @@ public class SecurityConfig {
                                 "/api/v1/quests/personal/{assignmentId}/submit",   // 개인 퀘스트 제출, 재제출
                                 "/api/v1/quests/personal/{assignmentId}/comment",  // 퀘스트 코멘트 조회
                                 "/api/students/**",                                // 학생 대시보드, 활동로그, 공지
-                                "/api/gacha/**",                                   // 가챠 정보, 뽑기
-                                "/api/collection/**",                              // 수족관, 도감
+                                "/api/v1/gacha/**",                                // 가챠
+                                "/api/v1/collection/**",                           // 수족관, 도감
                                 "/api/raids/my-raid",                              // 내 레이드 조회
                                 "/api/raids/{raidId}/attack"                       // 레이드 공격
                         ).hasRole("STUDENT")
