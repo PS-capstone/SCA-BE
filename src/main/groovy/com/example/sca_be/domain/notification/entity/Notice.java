@@ -30,7 +30,7 @@ public class Notice extends BaseTimeEntity {
     private Student student;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_id")
+    @JoinColumn(name = "assignment_id")
     private QuestAssignment questAssignment;
 
     @ManyToOne(fetch = FetchType.LAZY)
