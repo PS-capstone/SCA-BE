@@ -49,7 +49,7 @@ public class ActionLog extends BaseTimeEntity {
     private String logMessage;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_id")
+    @JoinColumn(name = "assignment_id")
     private QuestAssignment questAssignment;
 
     @ManyToOne(fetch = FetchType.LAZY)

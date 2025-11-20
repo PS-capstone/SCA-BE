@@ -18,11 +18,11 @@ public class QuestAssignment {
     private Integer assignmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quest_id", unique = true)
+    @JoinColumn(name = "quest_id")
     private Quest quest;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", unique = true)
+    @JoinColumn(name = "student_id")
     private Student student;
 
     @Column(name = "reward_coral_personal")
@@ -45,6 +45,10 @@ public class QuestAssignment {
         this.student = student;
         this.rewardCoralPersonal = rewardCoralPersonal;
         this.rewardResearchDataPersonal = rewardResearchDataPersonal;
+        this.status = status;
+    }
+
+    public void updateStatus(QuestStatus status) {
         this.status = status;
     }
 }

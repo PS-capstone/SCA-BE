@@ -18,4 +18,7 @@ public class CreateClassRequest {
     private String grade;
 
     private String subject;
+
+    private String description;
+
 }

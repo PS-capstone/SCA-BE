@@ -26,7 +26,8 @@ public class Fish {
     @Column(length = 20)
     private FishGrade grade;
 
-
+    @Column(name = "probability", nullable = false)
+    private Float probability;
 
     @OneToMany(mappedBy = "fish")
     private List<CollectionEntry> collectionEntries = new ArrayList<>();
