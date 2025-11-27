@@ -51,4 +51,9 @@ public class GroupQuestProgress {
         this.isCompleted = true;
         this.completedAt = LocalDateTime.now();
     }
+
+    public void uncompleteProgress() {
+        this.isCompleted = false;
+        this.completedAt = null;
+    }
 }

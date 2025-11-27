@@ -73,4 +73,8 @@ public class GroupQuest extends BaseTimeEntity {
         this.content = content;
         this.type = type;
     }
+
+    public void updateStatus(GroupQuestStatus status) {
+        this.status = status;
+    }
 }
