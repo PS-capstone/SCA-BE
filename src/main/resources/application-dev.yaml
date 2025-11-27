@@ -5,14 +5,14 @@ spring:
       path: /h2-console
 
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb;MODE=MYSQL;DATABASE_TO_UPPER=false
     driver-class-name: org.h2.Driver
     username: sa
     password:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -24,6 +24,8 @@ spring:
     init:
       mode: always
       encoding: UTF-8
+      schema-locations: classpath:schema-h2.sql
+      data-locations: classpath:data.sql
 
 logging:
   level:
@@ -34,3 +36,16 @@ jwt:
   secret: your-secret-key-must-be-at-least-256-bits-long-for-HS256-algorithm-security
   expiration: 900000 # 15분 (milliseconds)
   refresh-expiration: 604800000 # 7일 (milliseconds)
+
+file:
+  upload-dir: uploads # 파일 업로드 디렉토리
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY:dummy-access-key}
+      secret-key: ${AWS_SECRET_KEY:dummy-secret-key}
+    s3:
+      bucket: ${AWS_S3_BUCKET:dummy-bucket}
+    region:
+      static: ap-northeast-2

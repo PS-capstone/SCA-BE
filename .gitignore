@@ -82,3 +82,9 @@ spring-boot-devtools.properties
 
 ### Qodo (이미 .qodo/ 폴더 있음) ###
 .qodo/
+
+### AWS 키 파일 ###
+*.pem
+*.ppk
+.env
+.env.local

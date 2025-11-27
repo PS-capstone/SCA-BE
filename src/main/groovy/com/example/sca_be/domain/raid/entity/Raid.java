@@ -2,6 +2,7 @@ package com.example.sca_be.domain.raid.entity;
 
 import com.example.sca_be.domain.auth.entity.Teacher;
 import com.example.sca_be.domain.classroom.entity.Classes;
+import com.example.sca_be.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -16,11 +17,14 @@ import java.util.List;
 @Table(name = "raids")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Raid {
+public class Raid extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "raid_id")
     private Integer raidId;
+
+    @Column(name = "raid_name", nullable = false, length = 120)
+    private String raidName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id")
@@ -65,7 +69,19 @@ public class Raid {
     private List<Contribution> contributions = new ArrayList<>();
 
     @Builder
-    public Raid(Teacher teacher, Classes classes, LocalDateTime startDate, LocalDateTime endDate, Long totalBossHp, Long currentBossHp, Integer rewardCoral, String specialRewardDescription, RaidStatus status, Difficulty difficulty, RaidTemplate bossType) {
+    public Raid(String raidName,
+                Teacher teacher,
+                Classes classes,
+                LocalDateTime startDate,
+                LocalDateTime endDate,
+                Long totalBossHp,
+                Long currentBossHp,
+                Integer rewardCoral,
+                String specialRewardDescription,
+                RaidStatus status,
+                Difficulty difficulty,
+                RaidTemplate bossType) {
+        this.raidName = raidName;
         this.teacher = teacher;
         this.classes = classes;
         this.startDate = startDate;
@@ -77,5 +93,35 @@ public class Raid {
         this.status = status;
         this.difficulty = difficulty;
         this.bossType = bossType;
+    }
+
+    public boolean isActive() {
+        return this.status == RaidStatus.ACTIVE;
+    }
+
+    public void decreaseBossHp(long damage) {
+        if (damage <= 0) {
+            return;
+        }
+        long updated = (this.currentBossHp != null ? this.currentBossHp : 0L) - damage;
+        this.currentBossHp = Math.max(0L, updated);
+    }
+
+    public void markCompleted() {
+        this.status = RaidStatus.COMPLETED;
+        this.currentBossHp = 0L;
+    }
+
+    public void terminate() {
+        this.status = RaidStatus.TERMINATED;
+    }
+
+    public void expire() {
+        this.status = RaidStatus.EXPIRED;
+        this.currentBossHp = this.currentBossHp != null ? this.currentBossHp : 0L;
+    }
+
+    public void resetCurrentBossHp() {
+        this.currentBossHp = this.totalBossHp;
     }
 }

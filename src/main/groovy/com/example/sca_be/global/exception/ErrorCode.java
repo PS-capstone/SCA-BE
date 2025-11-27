@@ -18,12 +18,14 @@ public enum ErrorCode {
     TEACHER_NOT_FOUND("선생님을 찾을 수 없습니다."),
     RAID_NOT_FOUND("레이드를 찾을 수 없습니다."),
     GACHA_NOT_FOUND("가챠를 찾을 수 없습니다."),
+    FISH_NOT_FOUND("물고기를 찾을 수 없습니다."),
     INVALID_INVITE_CODE("유효하지 않은 반 코드입니다."),
 
     // ===== 중복/충돌 (409) =====
     DUPLICATE_USERNAME("이미 사용 중인 아이디입니다."),
     DUPLICATE_EMAIL("이미 사용 중인 이메일입니다."),
     DUPLICATE_NICKNAME("이미 사용 중인 닉네임입니다."),
+    DUPLICATE_FISH_NAME("이미 존재하는 물고기 이름입니다."),
     ALREADY_SUBMITTED("이미 제출된 퀘스트입니다."),
     ALREADY_JOINED("이미 참여 중인 반입니다."),
 
@@ -40,9 +42,7 @@ public enum ErrorCode {
 
     // ===== Personal Quest 관련 (400) =====
     TITLE_REQUIRED("제목은 필수입니다."),
-    CLASS_ID_REQUIRED("반 ID는 필수입니다."),
     STUDENTS_REQUIRED("최소 1명 이상의 학생을 선택해야 합니다."),
-    STUDENT_NOT_IN_CLASS("해당 학생은 지정된 반에 소속되어 있지 않습니다."),
     AI_REWARD_REQUIRED("AI 사용 시 AI 추천 보상 정보가 필요합니다."),
     ASSIGNMENT_NOT_FOUND("해당 할당을 찾을 수 없습니다."),
     ASSIGNMENT_ACCESS_DENIED("해당 퀘스트에 접근 권한이 없습니다."),

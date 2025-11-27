@@ -15,10 +15,13 @@ public class CreateClassRequest {
     @JsonProperty("class_name")
     private String className;
 
+    @JsonProperty("grade")
     private String grade;
 
+    @JsonProperty("subject")
     private String subject;
 
+    @JsonProperty("description")
     private String description;
 
 }

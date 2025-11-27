@@ -18,6 +18,7 @@ public class StudentListResponse {
     private String className;
     @JsonProperty("student_count")
     private Integer studentCount;
+    @JsonProperty("students")
     private List<StudentInfo> students;
 
     @Getter
@@ -26,9 +27,11 @@ public class StudentListResponse {
     public static class StudentInfo {
         @JsonProperty("student_id")
         private Integer studentId;
+        @JsonProperty("name")
         private String name;
         @JsonProperty("pending_quests")
         private Integer pendingQuests;  // 임시 하드코딩될 필드
+        @JsonProperty("coral")
         private Integer coral;
         @JsonProperty("research_data")
         private Integer researchData;

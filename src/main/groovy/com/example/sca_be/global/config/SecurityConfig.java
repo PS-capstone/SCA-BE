@@ -82,10 +82,11 @@ public class SecurityConfig {
                                 "/api/v1/quests/personal/{assignmentId}/approve",  // 개인 퀘스트 승인
                                 "/api/v1/quests/personal/{assignmentId}/reject",   // 개인 퀘스트 반려
                                 "/api/quests/group/**",                            // 단체 퀘스트 전체 (생성, 조회, 완료, 학생 체크)
-                                "/api/raids/creation-info",                        // 레이드 템플릿 조회
-                                "/api/raids",                                      // 레이드 생성 (POST)
-                                "/api/raids/{raidId}/detail",                      // 레이드 상세 조회 (선생님용)
-                                "/api/raids/{raidId}/terminate"                    // 레이드 강제 종료
+                                "/api/v1/raids/creation-info",                     // 레이드 템플릿 조회
+                                "/api/v1/raids",                                   // 레이드 생성 (POST)
+                                "/api/v1/raids/{raidId}/detail",                   // 레이드 상세 조회 (선생님용)
+                                "/api/v1/raids/{raidId}/terminate",                // 레이드 강제 종료
+                                "/api/v1/fish/**"                                  // 가챠 물고기 관리
                         ).hasRole("TEACHER")
 
                         // 'STUDENT' 권한이 필요한 경로
@@ -93,12 +94,23 @@ public class SecurityConfig {
                                 "/api/v1/quests/personal/my",                      // 내 개인 퀘스트 목록
                                 "/api/v1/quests/personal/{assignmentId}/submit",   // 개인 퀘스트 제출, 재제출
                                 "/api/v1/quests/personal/{assignmentId}/comment",  // 퀘스트 코멘트 조회
-                                "/api/students/**",                                // 학생 대시보드, 활동로그, 공지
-                                "/api/v1/gacha/**",                                // 가챠
+                                "/api/v1/students/**",                             // 학생 대시보드, 활동로그, 공지
+                                "/api/v1/gacha/**",                                // 가챠 정보, 뽑기
                                 "/api/v1/collection/**",                           // 수족관, 도감
-                                "/api/raids/my-raid",                              // 내 레이드 조회
-                                "/api/raids/{raidId}/attack"                       // 레이드 공격
+                                "/api/v1/raids/my-raid",                          // 내 레이드 조회
+                                "/api/v1/raids/{raidId}/attack",                   // 레이드 공격
+                                "/api/v1/raids/{raidId}/logs"                     // 레이드 로그 조회
                         ).hasRole("STUDENT")
+                        
+                        // TEACHER와 STUDENT 모두 접근 가능한 경로
+                        .requestMatchers(
+                                "/api/v1/files/upload"                             // 파일 업로드 (TEACHER, STUDENT 모두)
+                        ).hasAnyRole("TEACHER", "STUDENT")
+                        
+                        // 인증된 사용자만 접근 가능한 경로
+                        .requestMatchers(
+                                "/api/v1/files/**"                                 // 파일 다운로드
+                        ).authenticated()
 
                         // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()
@@ -124,7 +136,9 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://app.sca.site",
                 "https://teacher.sca.site",
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://localhost:5173"
         ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

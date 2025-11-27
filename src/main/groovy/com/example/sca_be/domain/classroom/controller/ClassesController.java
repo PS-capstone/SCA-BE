@@ -1,6 +1,7 @@
 package com.example.sca_be.domain.classroom.controller;
 
 import com.example.sca_be.domain.classroom.dto.ClassDetailResponse;
+import com.example.sca_be.domain.classroom.dto.ClassDashboardResponse;
 import com.example.sca_be.domain.classroom.dto.ClassListResponse;
 import com.example.sca_be.domain.classroom.dto.CreateClassRequest;
 import com.example.sca_be.domain.classroom.dto.CreateClassResponse;
@@ -78,6 +79,22 @@ public class ClassesController {
             @PathVariable("classId") Integer classId) {
 
         StudentListResponse response = classesService.getStudentList(classId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(response));
+    }
+
+    /**
+     * 5. 반 활동 대시보드 데이터 조회
+     * GET /api/classes/{classId}/dashboard
+     */
+    @GetMapping("/{classId}/dashboard")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<ApiResponse<ClassDashboardResponse>> getClassDashboard(
+            @PathVariable("classId") Integer classId) {
+
+        ClassDashboardResponse response = classesService.getClassDashboard(classId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

@@ -7,6 +7,7 @@ import com.example.sca_be.domain.gacha.dto.GachaInfoResponse;
 import com.example.sca_be.domain.gacha.entity.Collection;
 import com.example.sca_be.domain.gacha.entity.CollectionEntry;
 import com.example.sca_be.domain.gacha.entity.Fish;
+import com.example.sca_be.domain.gacha.entity.FishGrade;
 import com.example.sca_be.domain.gacha.repository.CollectionEntryRepository;
 import com.example.sca_be.domain.gacha.repository.CollectionRepository;
 import com.example.sca_be.domain.gacha.repository.FishRepository;
@@ -16,8 +17,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,10 +43,47 @@ public class GachaService {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STUDENT_NOT_FOUND));
 
+        // 등급별 확률 계산
+        List<Fish> allFish = fishRepository.findAll();
+        Map<FishGrade, Double> gradeProbabilityMap = allFish.stream()
+                .collect(Collectors.groupingBy(
+                        Fish::getGrade,
+                        Collectors.summingDouble(fish -> fish.getProbability().doubleValue())
+                ));
+
+        // 확률표 생성
+        List<GachaInfoResponse.ProbabilityInfo> probabilityTable = new ArrayList<>();
+        for (FishGrade grade : FishGrade.values()) {
+            double ratePercent = gradeProbabilityMap.getOrDefault(grade, 0.0) * 100.0;
+            String displayName = getGradeDisplayName(grade);
+            probabilityTable.add(GachaInfoResponse.ProbabilityInfo.builder()
+                    .grade(grade.name())
+                    .displayName(displayName)
+                    .ratePercent(ratePercent)
+                    .build());
+        }
+
         return GachaInfoResponse.builder()
                 .studentCoral(student.getCoral())
                 .gachaCost(GACHA_COST)
+                .probabilityTable(probabilityTable)
                 .build();
+    }
+
+    /**
+     * 등급 표시 이름 반환
+     */
+    private String getGradeDisplayName(FishGrade grade) {
+        switch (grade) {
+            case COMMON:
+                return "커먼";
+            case RARE:
+                return "레어";
+            case LEGENDARY:
+                return "레전드";
+            default:
+                return grade.name();
+        }
     }
 
     /**

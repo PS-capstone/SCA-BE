@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ClassDetailResponse {
 
+
     @JsonProperty("class_id")
     private Integer classId;
     @JsonProperty("class_name")
@@ -27,9 +28,12 @@ public class ClassDetailResponse {
     @Builder
     @AllArgsConstructor
     public static class OngoingGroupQuest {
+
         @JsonProperty("quest_id")
         private Integer questId;
+        @JsonProperty("title")
         private String title;
+        @JsonProperty("progress")
         private QuestProgress progress;
     }
 
@@ -37,7 +41,9 @@ public class ClassDetailResponse {
     @Builder
     @AllArgsConstructor
     public static class QuestProgress {
+        @JsonProperty("completed")
         private Integer completed;
+        @JsonProperty("required")
         private Integer required;
     }
 
@@ -47,20 +53,27 @@ public class ClassDetailResponse {
     public static class OngoingRaid {
         @JsonProperty("raid_id")
         private Integer raidId;
+        @JsonProperty("title")
         private String title;
         @JsonProperty("boss_hp")
         private BossHp bossHp;
+        @JsonProperty("participants")
         private Integer participants;
         @JsonProperty("end_date")
         private String endDate;
+        @JsonProperty("status")
+        private String status;
     }
 
     @Getter
     @Builder
     @AllArgsConstructor
     public static class BossHp {
-        private Integer current;
-        private Integer total;
+        @JsonProperty("current")
+        private Long current;
+        @JsonProperty("total")
+        private Long total;
+        @JsonProperty("percentage")
         private Integer percentage;
     }
 }

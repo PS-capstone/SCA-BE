@@ -14,6 +14,7 @@ public class ClassListResponse {
 
     @JsonProperty("teacher_name")
     private String teacherName;
+    @JsonProperty("classes")
     private List<ClassSummary> classes;
     @JsonProperty("total_count")
     private Integer totalCount;

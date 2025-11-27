@@ -10,6 +10,8 @@ import com.example.sca_be.domain.auth.repository.StudentRepository;
 import com.example.sca_be.domain.auth.repository.TeacherRepository;
 import com.example.sca_be.domain.classroom.entity.Classes;
 import com.example.sca_be.domain.classroom.repository.ClassesRepository;
+import com.example.sca_be.domain.personalquest.entity.QuestStatus;
+import com.example.sca_be.domain.personalquest.repository.QuestAssignmentRepository;
 import com.example.sca_be.global.exception.CustomException;
 import com.example.sca_be.global.exception.ErrorCode;
 import com.example.sca_be.global.security.jwt.JwtTokenProvider;
@@ -17,6 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,7 @@ public class AuthService {
     private final ClassesRepository classesRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final QuestAssignmentRepository questAssignmentRepository;
 
     // 1. 선생님 회원가입
     @Transactional
@@ -140,6 +146,12 @@ public class AuthService {
             throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
         }
 
+        // 사용자가 선택한 역할 검증
+        Role requestedRole = parseRequestedRole(request.getRole());
+        if (member.getRole() != requestedRole) {
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS, "선택한 역할로 로그인할 수 없습니다.");
+        }
+
         // 토큰 생성
         String accessToken = jwtTokenProvider.createToken(member.getMemberId(), member.getUsername());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getMemberId(), member.getUsername());
@@ -147,7 +159,8 @@ public class AuthService {
 
         // Role에 따라 다른 응답 반환
         if (member.getRole() == Role.TEACHER) {
-            Teacher teacher = member.getTeacher();
+            Teacher teacher = teacherRepository.findById(member.getMemberId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.TEACHER_NOT_FOUND));
             return TeacherLoginResponse.builder()
                     .userType("teacher")
                     .teacherId(teacher.getMemberId())
@@ -162,7 +175,9 @@ public class AuthService {
                     .expiresIn(expiresIn)
                     .build();
         } else {
-            Student student = member.getStudent();
+            // classes를 함께 조회하여 LazyInitializationException 방지
+            Student student = studentRepository.findByIdWithClasses(member.getMemberId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.STUDENT_NOT_FOUND));
             Classes classes = student.getClasses();
             return StudentLoginResponse.builder()
                     .userType("student")
@@ -171,8 +186,8 @@ public class AuthService {
                     .realName(member.getRealName())
                     .nickname(member.getNickname())
                     .email(member.getEmail())
-                    .classId(classes.getClassId())
-                    .className(classes.getClassName())
+                    .classId(classes != null ? classes.getClassId() : null)
+                    .className(classes != null ? classes.getClassName() : null)
                     .coral(student.getCoral() != null ? student.getCoral() : 0)
                     .researchData(student.getResearchData() != null ? student.getResearchData() : 0)
                     .role("ROLE_" + member.getRole().name())
@@ -181,6 +196,18 @@ public class AuthService {
                     .tokenType("Bearer")
                     .expiresIn(expiresIn)
                     .build();
+        }
+    }
+
+    private Role parseRequestedRole(String role) {
+        if (role == null || role.trim().isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_INPUT, "role 값이 필요합니다.");
+        }
+
+        try {
+            return Role.valueOf(role.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new CustomException(ErrorCode.INVALID_INPUT, "role 값은 teacher 또는 student 여야 합니다.");
         }
     }
 
@@ -211,6 +238,54 @@ public class AuthService {
                 .refreshToken(newRefreshToken)
                 .tokenType("Bearer")
                 .expiresIn(expiresIn)
+                .build();
+    }
+
+    // 5. 학생 프로필 조회
+    public StudentProfileResponse getStudentProfile(Integer studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STUDENT_NOT_FOUND));
+
+        Classes classes = student.getClasses();
+
+        // 승인된 퀘스트들의 보상 합계 계산
+        List<com.example.sca_be.domain.personalquest.entity.QuestAssignment> approvedQuests = 
+            questAssignmentRepository.findByStudentAndStatusIn(
+                studentId, 
+                Arrays.asList(QuestStatus.APPROVED)
+            );
+
+        System.out.println("학생 프로필 조회 - 학생 ID: " + studentId + ", 승인된 퀘스트 수: " + approvedQuests.size());
+        for (com.example.sca_be.domain.personalquest.entity.QuestAssignment qa : approvedQuests) {
+            System.out.println("  - Assignment ID: " + qa.getAssignmentId() + 
+                             ", 코랄: " + qa.getRewardCoralPersonal() + 
+                             ", 탐사데이터: " + qa.getRewardResearchDataPersonal());
+        }
+
+        int totalEarnedCoral = approvedQuests.stream()
+            .mapToInt(qa -> qa.getRewardCoralPersonal() != null ? qa.getRewardCoralPersonal() : 0)
+            .sum();
+
+        int totalEarnedResearchData = approvedQuests.stream()
+            .mapToInt(qa -> qa.getRewardResearchDataPersonal() != null ? qa.getRewardResearchDataPersonal() : 0)
+            .sum();
+        
+        System.out.println("총 획득 코랄: " + totalEarnedCoral + ", 총 획득 탐사데이터: " + totalEarnedResearchData);
+        System.out.println("현재 보유 코랄: " + (student.getCoral() != null ? student.getCoral() : 0) + 
+                         ", 현재 보유 탐사데이터: " + (student.getResearchData() != null ? student.getResearchData() : 0));
+
+        return StudentProfileResponse.builder()
+                .studentId(student.getMemberId())
+                .username(student.getMember().getUsername())
+                .realName(student.getMember().getRealName())
+                .nickname(student.getMember().getNickname())
+                .email(student.getMember().getEmail())
+                .classId(classes != null ? classes.getClassId() : null)
+                .className(classes != null ? classes.getClassName() : null)
+                .coral(student.getCoral() != null ? student.getCoral() : 0)
+                .researchData(student.getResearchData() != null ? student.getResearchData() : 0)
+                .totalEarnedCoral(totalEarnedCoral)
+                .totalEarnedResearchData(totalEarnedResearchData)
                 .build();
     }
 
