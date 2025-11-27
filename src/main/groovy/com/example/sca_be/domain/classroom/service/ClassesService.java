@@ -10,6 +10,11 @@ import com.example.sca_be.domain.classroom.dto.*;
 import com.example.sca_be.domain.classroom.entity.Classes;
 import com.example.sca_be.domain.classroom.repository.ClassesRepository;
 import com.example.sca_be.domain.classroom.util.InviteCodeGenerator;
+import com.example.sca_be.domain.groupquest.entity.GroupQuest;
+import com.example.sca_be.domain.groupquest.entity.GroupQuestProgress;
+import com.example.sca_be.domain.groupquest.entity.GroupQuestStatus;
+import com.example.sca_be.domain.groupquest.repository.GroupQuestProgressRepository;
+import com.example.sca_be.domain.groupquest.repository.GroupQuestRepository;
 import com.example.sca_be.domain.notification.entity.ActionLog;
 import com.example.sca_be.domain.notification.repository.ActionLogRepository;
 import com.example.sca_be.domain.personalquest.entity.QuestAssignment;
@@ -49,6 +54,8 @@ public class ClassesService {
     private final RaidRepository raidRepository;
     private final ContributionRepository contributionRepository;
     private final ActionLogRepository actionLogRepository;
+    private final GroupQuestRepository groupQuestRepository;
+    private final GroupQuestProgressRepository groupQuestProgressRepository;
     private final Random random = new Random();
 
     //현재 로그인한 선생님의 반 목록 조회
@@ -166,33 +173,27 @@ public class ClassesService {
 
         int studentCount = studentRepository.countByClasses(classes);
 
-        // 임시 하드코딩: 진행 중인 단체 퀘스트
-        List<ClassDetailResponse.OngoingGroupQuest> ongoingGroupQuests = List.of(
-                ClassDetailResponse.OngoingGroupQuest.builder()
-                        .questId(101)
-                        .title("출석 체크")
-                        .progress(ClassDetailResponse.QuestProgress.builder()
-                                .completed(Math.min(studentCount - 3, studentCount))
-                                .required(studentCount)
-                                .build())
-                        .build(),
-                ClassDetailResponse.OngoingGroupQuest.builder()
-                        .questId(102)
-                        .title("수업 참여도")
-                        .progress(ClassDetailResponse.QuestProgress.builder()
-                                .completed(Math.min(studentCount - 1, studentCount))
-                                .required(studentCount)
-                                .build())
-                        .build(),
-                ClassDetailResponse.OngoingGroupQuest.builder()
-                        .questId(103)
-                        .title("과제 제출")
-                        .progress(ClassDetailResponse.QuestProgress.builder()
-                                .completed(Math.min(studentCount - 4, studentCount))
-                                .required(studentCount)
-                                .build())
-                        .build()
-        );
+        // DB에서 진행 중인 단체 퀘스트 조회
+        List<GroupQuest> activeGroupQuests = groupQuestRepository.findByClassIdAndStatus(classId, GroupQuestStatus.ACTIVE);
+
+        List<ClassDetailResponse.OngoingGroupQuest> ongoingGroupQuests = activeGroupQuests.stream()
+                .map(quest -> {
+                    // 해당 퀘스트의 완료한 학생 수 조회
+                    Integer completedCount = groupQuestProgressRepository.countCompletedByGroupQuestId(quest.getGroupQuestId());
+                    if (completedCount == null) {
+                        completedCount = 0;
+                    }
+
+                    return ClassDetailResponse.OngoingGroupQuest.builder()
+                            .questId(quest.getGroupQuestId())
+                            .title(quest.getTitle())
+                            .progress(ClassDetailResponse.QuestProgress.builder()
+                                    .completed(completedCount)
+                                    .required(studentCount)
+                                    .build())
+                            .build();
+                })
+                .collect(Collectors.toList());
 
         // 실제 데이터베이스에서 진행 중인 레이드 조회
         ClassDetailResponse.OngoingRaid ongoingRaid = null;

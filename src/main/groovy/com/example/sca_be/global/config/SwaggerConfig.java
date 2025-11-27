@@ -3,6 +3,8 @@ package com.example.sca_be.global.config;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,8 +14,22 @@ public class SwaggerConfig {
     //open api bean을 등록해서 기본 정보 설정
     @Bean
     public OpenAPI openAPI() {
+        String jwtSchemeName = "JWT Token";
+
+        // SecurityScheme 설정: Bearer Token 방식의 JWT 인증
+        SecurityScheme securityScheme = new SecurityScheme()
+                .name(jwtSchemeName)
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT");
+
+        // SecurityRequirement 설정: 모든 API에 JWT 인증 적용
+        SecurityRequirement securityRequirement = new SecurityRequirement()
+                .addList(jwtSchemeName);
+
         return new OpenAPI()
-                .components(new Components())
+                .components(new Components().addSecuritySchemes(jwtSchemeName, securityScheme))
+                .addSecurityItem(securityRequirement)
                 .info(apiInfo());
     }
 
