@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RaidListResponse {
 
+    @JsonProperty("raids")
     private List<RaidSummary> raids;
 
     @JsonProperty("total_count")
@@ -30,7 +31,9 @@ public class RaidListResponse {
         private String className;
         @JsonProperty("raid_name")
         private String raidName;
+        @JsonProperty("status")
         private String status;
+        @JsonProperty("difficulty")
         private String difficulty;
         @JsonProperty("current_boss_hp")
         private Long currentBossHp;

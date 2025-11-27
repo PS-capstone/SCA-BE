@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class RaidLogMessage {
     @JsonProperty("raid_id")
     private Integer raidId;
+    @JsonProperty("type")
     private String type;
     @JsonProperty("student_name")
     private String studentName;
@@ -20,6 +21,7 @@ public class RaidLogMessage {
     private Integer damageAmount;
     @JsonProperty("remaining_boss_hp")
     private Long remainingBossHp;
+    @JsonProperty("message")
     private String message;
     @JsonProperty("created_at")
     private LocalDateTime createdAt;

@@ -30,6 +30,7 @@ public class RaidAttackResponse {
     @JsonProperty("raid_completed")
     private Boolean raidCompleted;
 
+    @JsonProperty("rewards")
     private Rewards rewards;
 
     @JsonProperty("my_stats")
@@ -42,8 +43,11 @@ public class RaidAttackResponse {
     @Builder
     @AllArgsConstructor
     public static class BossHp {
+        @JsonProperty("before")
         private Long before;
+        @JsonProperty("after")
         private Long after;
+        @JsonProperty("percentage")
         private Integer percentage;
     }
 
@@ -51,6 +55,7 @@ public class RaidAttackResponse {
     @Builder
     @AllArgsConstructor
     public static class Rewards {
+        @JsonProperty("coral")
         private Integer coral;
         @JsonProperty("research_data")
         private Integer researchData;

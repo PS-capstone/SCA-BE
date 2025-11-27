@@ -32,17 +32,13 @@ public class Fish {
     @Column(name = "probability", nullable = false)
     private Float probability;
 
-    @Column(name = "image_url", length = 500)
-    private String imageUrl;
-
     @OneToMany(mappedBy = "fish")
     @Builder.Default
     private List<CollectionEntry> collectionEntries = new ArrayList<>();
 
-    public void update(String fishName, FishGrade grade, Float probability, String imageUrl) {
+    public void update(String fishName, FishGrade grade, Float probability) {
         this.fishName = fishName;
         this.grade = grade;
         this.probability = probability;
-        this.imageUrl = imageUrl;
     }
 }

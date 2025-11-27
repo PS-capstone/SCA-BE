@@ -213,9 +213,9 @@ INSERT INTO group_quest_progress (group_quest_id, student_id, is_completed, comp
 -- 13. Raids (Raids)
 -- raid_id is auto-generated
 INSERT INTO raids (teacher_id, class_id, raid_name, boss_type, difficulty, status, start_date, end_date, total_boss_hp, current_boss_hp, reward_coral, special_reward_description) VALUES
-(1, 1, '중간고사 대비 크라켄', 'KRAKEN', 'HIGH', 'ACTIVE', '2025-11-10 00:00:00', '2025-11-20 23:59:59', 10000, 3500, 200, 'Legendary grade fish acquisition opportunity'),
-(2, 2, '헬릭스 인더스트리 소탕전', 'ZELUS_INDUSTRY', 'MEDIUM', 'COMPLETED', '2025-11-05 00:00:00', '2025-11-12 23:59:59', 5000, 0, 150, 'Rare grade fish x3'),
-(3, 3, '기말 대비 정찰 작전', 'KRAKEN', 'LOW', 'ACTIVE', '2025-11-15 00:00:00', '2025-11-22 23:59:59', 3000, 2100, 100, 'Common grade fish x10');
+(1, 1, '중간고사 대비 크라켄', 'KRAKEN', 'HIGH', 'ACTIVE', '2025-11-10 00:00:00', '2025-12-29 23:59:59', 10000, 3500, 200, 'Legendary grade fish acquisition opportunity'),
+(2, 2, '헬릭스 인더스트리 소탕전', 'ZELUS_INDUSTRY', 'MEDIUM', 'COMPLETED', '2025-11-05 00:00:00', '2025-12-29 23:59:59', 5000, 0, 150, 'Rare grade fish x3'),
+(3, 3, '기말 대비 정찰 작전', 'KRAKEN', 'LOW', 'ACTIVE', '2025-11-15 00:00:00', '2025-12-29 23:59:59', 3000, 2100, 100, 'Common grade fish x10');
 
 -- 14. Contributions (Raid Contributions)
 -- contribution_id is auto-generated

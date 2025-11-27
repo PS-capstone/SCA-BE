@@ -13,7 +13,9 @@ public class RaidTerminateResponse {
     @JsonProperty("raid_id")
     private Integer raidId;
 
+    @JsonProperty("status")
     private String status;
 
+    @JsonProperty("message")
     private String message;
 }

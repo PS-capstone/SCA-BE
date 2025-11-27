@@ -72,7 +72,7 @@ public interface QuestAssignmentRepository extends JpaRepository<QuestAssignment
            "LEFT JOIN FETCH qa.submission sub " +
            "WHERE s.memberId = :studentId " +
            "AND qa.status = :status " +
-           "AND sub.submittedAt >= :oneWeekAgo")
+           "AND q.createdAt >= :oneWeekAgo")
     List<QuestAssignment> findApprovedQuestsWithinWeek(
         @Param("studentId") Integer studentId,
         @Param("status") QuestStatus status,

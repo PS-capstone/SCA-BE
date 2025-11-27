@@ -16,7 +16,9 @@ public class CreateClassResponse {
     private Integer classId;
     @JsonProperty("class_name")
     private String className;
+    @JsonProperty("grade")
     private String grade;
+    @JsonProperty("subject")
     private String subject;
     @JsonProperty("invite_code")
     private String inviteCode;

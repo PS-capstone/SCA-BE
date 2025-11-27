@@ -24,10 +24,13 @@ public class RaidDetailResponse {
     @JsonProperty("raid_name")
     private String raidName;
 
+    @JsonProperty("template")
     private String template;
 
+    @JsonProperty("difficulty")
     private String difficulty;
 
+    @JsonProperty("status")
     private String status;
 
     @JsonProperty("start_date")
@@ -57,6 +60,7 @@ public class RaidDetailResponse {
     @JsonProperty("remaining_seconds")
     private Long remainingSeconds;
 
+    @JsonProperty("contributions")
     private List<ContributionInfo> contributions;
 
     @Getter
@@ -69,6 +73,7 @@ public class RaidDetailResponse {
         @JsonProperty("student_name")
         private String studentName;
 
+        @JsonProperty("damage")
         private Long damage;
 
         @JsonProperty("contribution_percent")

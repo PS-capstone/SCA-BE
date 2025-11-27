@@ -13,13 +13,16 @@ import java.util.List;
 @AllArgsConstructor
 public class RaidLogResponse {
 
+    @JsonProperty("logs")
     private List<RaidLogItem> logs;
 
     @JsonProperty("total_count")
     private Long totalCount;
 
+    @JsonProperty("page")
     private int page;
 
+    @JsonProperty("size")
     private int size;
 
     @Getter
@@ -30,7 +33,9 @@ public class RaidLogResponse {
         private Long logId;
         @JsonProperty("student_name")
         private String studentName;
+        @JsonProperty("damage")
         private Integer damage;
+        @JsonProperty("timestamp")
         private LocalDateTime timestamp;
         @JsonProperty("time_ago")
         private String timeAgo;

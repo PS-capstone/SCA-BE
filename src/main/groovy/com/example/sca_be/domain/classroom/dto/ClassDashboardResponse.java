@@ -40,6 +40,7 @@ public class ClassDashboardResponse {
     @Builder
     @AllArgsConstructor
     public static class WeeklySummary {
+        @JsonProperty("submissions")
         private Integer submissions;
         @JsonProperty("approval_rate")
         private Double approvalRate;
@@ -55,8 +56,11 @@ public class ClassDashboardResponse {
     @Builder
     @AllArgsConstructor
     public static class QuestActivityTrend {
+        @JsonProperty("date")
         private String date;
+        @JsonProperty("submissions")
         private Integer submissions;
+        @JsonProperty("approvals")
         private Integer approvals;
     }
 
@@ -90,7 +94,9 @@ public class ClassDashboardResponse {
     @Builder
     @AllArgsConstructor
     public static class HourlyDistribution {
+        @JsonProperty("hour")
         private Integer hour;
+        @JsonProperty("count")
         private Integer count;
     }
 

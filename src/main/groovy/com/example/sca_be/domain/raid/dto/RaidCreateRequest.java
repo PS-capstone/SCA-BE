@@ -17,6 +17,7 @@ public class RaidCreateRequest {
     private Integer classId;
 
     @NotNull(message = "보스 템플릿은 필수입니다.")
+    @JsonProperty("template")
     private String template;
 
     @NotNull(message = "레이드 이름은 필수입니다.")
@@ -24,6 +25,7 @@ public class RaidCreateRequest {
     private String raidName;
 
     @NotNull(message = "난이도는 필수입니다.")
+    @JsonProperty("difficulty")
     private String difficulty;
 
     @NotNull(message = "시작 일시는 필수입니다.")

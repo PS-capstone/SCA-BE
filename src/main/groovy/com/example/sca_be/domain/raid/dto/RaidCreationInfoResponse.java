@@ -15,6 +15,7 @@ public class RaidCreationInfoResponse {
     @JsonProperty("class_info")
     private ClassInfo classInfo;
 
+    @JsonProperty("templates")
     private List<Template> templates;
 
     @JsonProperty("difficulty_options")
@@ -41,9 +42,11 @@ public class RaidCreationInfoResponse {
     @Builder
     @AllArgsConstructor
     public static class Template {
+        @JsonProperty("code")
         private String code;
         @JsonProperty("display_name")
         private String displayName;
+        @JsonProperty("description")
         private String description;
     }
 
@@ -51,9 +54,11 @@ public class RaidCreationInfoResponse {
     @Builder
     @AllArgsConstructor
     public static class DifficultyOption {
+        @JsonProperty("code")
         private String code;
         @JsonProperty("display_name")
         private String displayName;
+        @JsonProperty("hp")
         private Long hp;
         @JsonProperty("min_hp")
         private Long minHp;
@@ -71,6 +76,7 @@ public class RaidCreationInfoResponse {
         @JsonProperty("raid_name")
         private String raidName;
 
+        @JsonProperty("status")
         private String status;
 
         @JsonProperty("current_hp")

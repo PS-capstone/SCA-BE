@@ -28,8 +28,10 @@ public class StudentRaidResponse {
     @JsonProperty("template_name")
     private String templateName;
 
+    @JsonProperty("difficulty")
     private String difficulty;
 
+    @JsonProperty("status")
     private String status;
 
     @JsonProperty("boss_hp")

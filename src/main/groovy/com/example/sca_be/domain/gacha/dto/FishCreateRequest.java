@@ -19,7 +19,5 @@ public class FishCreateRequest {
     @NotNull(message = "확률은 필수입니다.")
     @Positive(message = "확률은 0보다 커야 합니다.")
     private Float probability;
-
-    private String image_url;
 }
 

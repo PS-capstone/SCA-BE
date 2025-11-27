@@ -48,7 +48,6 @@ public class FishService {
                 .fishName(request.getFish_name())
                 .grade(request.getGrade())
                 .probability(request.getProbability())
-                .imageUrl(request.getImage_url())
                 .build();
 
         Fish savedFish = fishRepository.save(fish);
@@ -72,8 +71,7 @@ public class FishService {
         fish.update(
                 request.getFish_name(),
                 request.getGrade(),
-                request.getProbability(),
-                request.getImage_url()
+                request.getProbability()
         );
 
         return new FishResponse(fish);
