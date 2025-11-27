@@ -112,7 +112,15 @@ public class PersonalQuestController {
             @RequestParam(value = "status",required = false) String status) {
 
         Integer studentId = getStudentId(authentication);
+        System.out.println("=== 퀘스트 조회 API 호출 ===");
+        System.out.println("인증된 학생 ID: " + studentId);
+        System.out.println("요청 파라미터 status: " + status);
+        
         MyQuestListResponse response = personalQuestService.getMyQuests(studentId, status);
+        
+        System.out.println("응답 - 활성 퀘스트 수: " + (response.getActiveQuests() != null ? response.getActiveQuests().size() : 0));
+        System.out.println("응답 - 승인 퀘스트 수: " + (response.getApprovedQuests() != null ? response.getApprovedQuests().size() : 0));
+        System.out.println("========================");
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

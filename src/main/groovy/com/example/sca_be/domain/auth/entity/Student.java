@@ -40,9 +40,9 @@ public class Student {
     @Column(name = "research_data", nullable = false)
     private Integer researchData;
 
-    @ColumnDefault("1.0")
-    @Column(name = "correction_factor", nullable = false)
-    private Float correctionFactor; // 보정계수
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Float grade; // 학생 성적
 
     @Builder
     public Student(Member member, Classes classes) {
@@ -52,11 +52,34 @@ public class Student {
 
     // 보상 지급 메서드
     public void addCoral(Integer amount) {
+        if (amount == null) {
+            amount = 0;
+        }
         this.coral = (this.coral != null ? this.coral : 0) + amount;
     }
 
     public void addResearchData(Integer amount) {
+        if (amount == null) {
+            amount = 0;
+        }
         this.researchData = (this.researchData != null ? this.researchData : 0) + amount;
+    }
+
+    public void deductResearchData(Integer amount) {
+        if (amount == null || amount <= 0) {
+            throw new IllegalArgumentException("차감할 탐사데이터가 올바르지 않습니다.");
+        }
+        if (this.researchData == null) {
+            this.researchData = 0;
+        }
+        if (this.researchData < amount) {
+            throw new IllegalStateException("보유한 탐사데이터가 부족합니다.");
+        }
+        this.researchData -= amount;
+    }
+
+    public boolean hasSufficientResearchData(Integer amount) {
+        return this.researchData != null && this.researchData >= amount;
     }
 
     // 코랄 차감 메서드
@@ -77,6 +100,11 @@ public class Student {
 
     // Classes getter 메서드 이름 수정 (Service에서 사용)
     public Classes getClassEntity() {
+        return this.classes;
+    }
+
+    // Lombok @Getter가 생성하지만 명시적으로 추가 (호환성)
+    public Classes getClasses() {
         return this.classes;
     }
 }

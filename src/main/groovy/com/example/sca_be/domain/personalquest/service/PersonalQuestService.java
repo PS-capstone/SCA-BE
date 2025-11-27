@@ -4,8 +4,6 @@ import com.example.sca_be.domain.auth.entity.Student;
 import com.example.sca_be.domain.auth.entity.Teacher;
 import com.example.sca_be.domain.auth.repository.StudentRepository;
 import com.example.sca_be.domain.auth.repository.TeacherRepository;
-import com.example.sca_be.domain.classroom.entity.Classes;
-import com.example.sca_be.domain.classroom.repository.ClassesRepository;
 import com.example.sca_be.domain.personalquest.dto.*;
 import com.example.sca_be.domain.personalquest.entity.Quest;
 import com.example.sca_be.domain.personalquest.entity.QuestAssignment;
@@ -36,7 +34,6 @@ public class PersonalQuestService {
     private final SubmissionRepository submissionRepository;
     private final StudentRepository studentRepository;
     private final TeacherRepository teacherRepository;
-    private final ClassesRepository classesRepository;
 
     /**
      * 퀘스트 생성 및 할당
@@ -46,9 +43,6 @@ public class PersonalQuestService {
         // Validation
         if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
             throw new CustomException(ErrorCode.TITLE_REQUIRED);
-        }
-        if (request.getClassId() == null) {
-            throw new CustomException(ErrorCode.CLASS_ID_REQUIRED);
         }
         if (request.getAssignments() == null || request.getAssignments().isEmpty()) {
             throw new CustomException(ErrorCode.STUDENTS_REQUIRED);
@@ -67,14 +61,6 @@ public class PersonalQuestService {
         Teacher teacher = teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEACHER_NOT_FOUND));
 
-        // Class 조회 및 권한 확인
-        Classes classes = classesRepository.findById(request.getClassId())
-                .orElseThrow(() -> new CustomException(ErrorCode.CLASS_NOT_FOUND));
-
-        if (!classes.getTeacher().getMemberId().equals(teacherId)) {
-            throw new CustomException(ErrorCode.CLASS_ACCESS_DENIED);
-        }
-
         // Quest 생성
         Quest quest = Quest.builder()
                 .teacher(teacher)
@@ -87,41 +73,63 @@ public class PersonalQuestService {
                 .build();
 
         Quest savedQuest = questRepository.save(quest);
+        questRepository.flush(); // Quest를 먼저 DB에 반영
+        System.out.println("=== 퀘스트 생성 완료 ===");
+        System.out.println("Quest ID: " + savedQuest.getQuestId() + ", 제목: " + savedQuest.getTitle());
 
-        // QuestAssignment 생성 - 해당 반의 학생들만 대상으로
+        // QuestAssignment 생성
         List<QuestAssignment> assignments = new ArrayList<>();
         for (QuestCreateRequest.AssignmentRequest assignmentReq : request.getAssignments()) {
-            Student student = studentRepository.findById(assignmentReq.getStudentId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.STUDENT_NOT_FOUND));
+            try {
+                Student student = studentRepository.findById(assignmentReq.getStudentId())
+                        .orElseThrow(() -> new CustomException(ErrorCode.STUDENT_NOT_FOUND));
 
-            // 학생이 해당 반에 소속되어 있는지 확인
-            if (student.getClasses() == null ||
-                !student.getClasses().getClassId().equals(request.getClassId())) {
-                throw new CustomException(ErrorCode.STUDENT_NOT_IN_CLASS);
+                System.out.println("퀘스트 할당 생성 시작 - 학생 ID: " + student.getMemberId() + ", 학생 이름: " + student.getMember().getRealName());
+
+                QuestAssignment assignment = QuestAssignment.builder()
+                        .quest(savedQuest)
+                        .student(student)
+                        .rewardCoralPersonal(assignmentReq.getRewardCoralPersonal())
+                        .rewardResearchDataPersonal(assignmentReq.getRewardResearchDataPersonal())
+                        .status(QuestStatus.ASSIGNED)
+                        .build();
+
+                QuestAssignment savedAssignment = questAssignmentRepository.save(assignment);
+                questAssignmentRepository.flush(); // 즉시 DB에 반영
+                
+                System.out.println("✅ 퀘스트 할당 저장 완료 - Assignment ID: " + savedAssignment.getAssignmentId() + 
+                                 ", Quest ID: " + savedQuest.getQuestId() + 
+                                 ", Student ID: " + savedAssignment.getStudent().getMemberId() +
+                                 ", Status: " + savedAssignment.getStatus());
+                
+                assignments.add(savedAssignment);
+            } catch (Exception e) {
+                System.err.println("❌ 퀘스트 할당 저장 실패 - 학생 ID: " + assignmentReq.getStudentId());
+                System.err.println("에러: " + e.getMessage());
+                e.printStackTrace();
+                throw e; // 에러를 다시 던져서 트랜잭션 롤백
             }
-
-            QuestAssignment assignment = QuestAssignment.builder()
-                    .quest(savedQuest)
-                    .student(student)
-                    .rewardCoralPersonal(assignmentReq.getRewardCoralPersonal())
-                    .rewardResearchDataPersonal(assignmentReq.getRewardResearchDataPersonal())
-                    .status(QuestStatus.ASSIGNED)
-                    .build();
-
-            assignments.add(questAssignmentRepository.save(assignment));
         }
+        
+        System.out.println("총 " + assignments.size() + "개의 할당이 저장되었습니다.");
 
-        // Response 생성
+        // Response 생성 (트랜잭션 내에서 member 정보를 미리 로드)
         List<QuestCreateResponse.AssignmentInfo> assignmentInfos = assignments.stream()
-                .map(assignment -> QuestCreateResponse.AssignmentInfo.builder()
-                        .assignmentId(assignment.getAssignmentId())
-                        .studentId(assignment.getStudent().getMemberId())
-                        .studentName(assignment.getStudent().getMember().getRealName())
-                        .rewardCoralPersonal(assignment.getRewardCoralPersonal())
-                        .rewardResearchDataPersonal(assignment.getRewardResearchDataPersonal())
-                        .status(assignment.getStatus())
-                        .build())
+                .map(assignment -> {
+                    // Lazy loading을 트랜잭션 내에서 처리
+                    String studentName = assignment.getStudent().getMember().getRealName();
+                    return QuestCreateResponse.AssignmentInfo.builder()
+                            .assignmentId(assignment.getAssignmentId())
+                            .studentId(assignment.getStudent().getMemberId())
+                            .studentName(studentName)
+                            .rewardCoralPersonal(assignment.getRewardCoralPersonal())
+                            .rewardResearchDataPersonal(assignment.getRewardResearchDataPersonal())
+                            .status(assignment.getStatus())
+                            .build();
+                })
                 .collect(Collectors.toList());
+        
+        System.out.println("Response 생성 완료 - " + assignmentInfos.size() + "개의 할당 정보 포함");
 
         return QuestCreateResponse.builder()
                 .questId(savedQuest.getQuestId())
@@ -129,7 +137,6 @@ public class PersonalQuestService {
                 .teacherContent(savedQuest.getTeacherContent())
                 .difficulty(savedQuest.getDifficulty())
                 .deadline(savedQuest.getDeadline())
-                .classId(request.getClassId())
                 .rewardCoralDefault(savedQuest.getRewardCoralDefault())
                 .rewardResearchDataDefault(savedQuest.getRewardResearchDataDefault())
                 .createdAt(savedQuest.getCreatedAt())
@@ -270,8 +277,25 @@ public class PersonalQuestService {
 
         // 보상 지급
         Student student = assignment.getStudent();
-        student.addCoral(assignment.getRewardCoralPersonal());
-        student.addResearchData(assignment.getRewardResearchDataPersonal());
+        Integer rewardCoral = assignment.getRewardCoralPersonal() != null ? assignment.getRewardCoralPersonal() : 0;
+        Integer rewardResearchData = assignment.getRewardResearchDataPersonal() != null ? assignment.getRewardResearchDataPersonal() : 0;
+        
+        System.out.println("=== 퀘스트 승인 ===");
+        System.out.println("학생 ID: " + student.getMemberId());
+        System.out.println("Assignment ID: " + assignment.getAssignmentId());
+        System.out.println("지급할 코랄: " + rewardCoral);
+        System.out.println("지급할 탐사데이터: " + rewardResearchData);
+        System.out.println("지급 전 코랄: " + student.getCoral());
+        System.out.println("지급 전 탐사데이터: " + student.getResearchData());
+        
+        student.addCoral(rewardCoral);
+        student.addResearchData(rewardResearchData);
+        studentRepository.save(student); // 명시적으로 저장
+        studentRepository.flush(); // 즉시 DB에 반영
+        
+        System.out.println("지급 후 코랄: " + student.getCoral());
+        System.out.println("지급 후 탐사데이터: " + student.getResearchData());
+        System.out.println("==================");
 
         // 상태 업데이트
         assignment.updateStatus(QuestStatus.APPROVED);
@@ -332,49 +356,70 @@ public class PersonalQuestService {
      * 내 퀘스트 목록 조회 (학생)
      */
     public MyQuestListResponse getMyQuests(Integer studentId, String status) {
-        List<QuestAssignment> assignments;
-        String responseStatus;
+        List<QuestStatus> activeStatuses = Arrays.asList(
+                QuestStatus.ASSIGNED, QuestStatus.SUBMITTED, QuestStatus.REJECTED);
 
-        if (status == null || status.isEmpty()) {
-            status = "ACTIVE";
+        System.out.println("=== 퀘스트 조회 시작 ===");
+        System.out.println("조회할 학생 ID: " + studentId);
+        System.out.println("조회할 상태 목록: " + activeStatuses);
+        
+        // 전체 할당 조회 (디버깅용)
+        List<QuestAssignment> allAssignments = questAssignmentRepository.findAll();
+        System.out.println("전체 퀘스트 할당 수: " + allAssignments.size());
+        
+        // 쿼리로 활성 퀘스트 조회
+        List<QuestAssignment> activeQuests = questAssignmentRepository.findByStudentAndStatusIn(
+                studentId, activeStatuses);
+        System.out.println("쿼리 결과 - 학생 ID: " + studentId + ", 활성 퀘스트 수: " + activeQuests.size());
+        
+        // 각 퀘스트 상세 정보 출력
+        if (activeQuests.isEmpty()) {
+            System.out.println("⚠️ 활성 퀘스트가 없습니다!");
+        } else {
+            for (QuestAssignment qa : activeQuests) {
+                System.out.println("  ✅ Assignment ID: " + qa.getAssignmentId() + 
+                                 ", Quest ID: " + qa.getQuest().getQuestId() + 
+                                 ", Status: " + qa.getStatus() + 
+                                 ", Student ID: " + qa.getStudent().getMemberId());
+            }
         }
+        
+        List<QuestAssignment> allStudentAssignments = allAssignments.stream()
+                .filter(qa -> {
+                    Integer qaStudentId = qa.getStudent().getMemberId();
+                    boolean matches = qaStudentId.equals(studentId);
+                    if (matches) {
+                        System.out.println("  🔍 발견 - Assignment ID: " + qa.getAssignmentId() + 
+                                         ", Status: " + qa.getStatus() + 
+                                         ", Student ID: " + qaStudentId);
+                    }
+                    return matches;
+                })
+                .collect(Collectors.toList());
+        System.out.println("전체 할당 중 학생 ID " + studentId + "의 할당 수: " + allStudentAssignments.size());
+        
+        // ASSIGNED 상태인 할당만 필터링
+        List<QuestAssignment> assignedQuests = allStudentAssignments.stream()
+                .filter(qa -> qa.getStatus() == QuestStatus.ASSIGNED)
+                .collect(Collectors.toList());
+        System.out.println("학생 ID " + studentId + "의 ASSIGNED 상태 퀘스트 수: " + assignedQuests.size());
+        
+        System.out.println("======================");
 
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        List<QuestAssignment> expiredQuests = questAssignmentRepository.findExpiredQuestsWithinWeek(
+                studentId, QuestStatus.EXPIRED, oneWeekAgo);
+        System.out.println("만료 퀘스트 수: " + expiredQuests.size());
 
-        switch (status.toUpperCase()) {
-            case "ACTIVE":
-                List<QuestStatus> activeStatuses = Arrays.asList(
-                        QuestStatus.ASSIGNED, QuestStatus.SUBMITTED, QuestStatus.REJECTED);
-                assignments = questAssignmentRepository.findByStudentAndStatusIn(
-                        studentId, activeStatuses);
-                responseStatus = "ACTIVE";
-                break;
-
-            case "APPROVED":
-                assignments = questAssignmentRepository.findApprovedQuestsWithinWeek(
-                        studentId, QuestStatus.APPROVED, oneWeekAgo);
-                responseStatus = "APPROVED";
-                break;
-
-            case "EXPIRED":
-                assignments = questAssignmentRepository.findExpiredQuestsWithinWeek(
-                        studentId, QuestStatus.EXPIRED, oneWeekAgo);
-                responseStatus = "EXPIRED";
-                break;
-
-            default:
-                List<QuestStatus> defaultActiveStatuses = Arrays.asList(
-                        QuestStatus.ASSIGNED, QuestStatus.SUBMITTED, QuestStatus.REJECTED);
-                assignments = questAssignmentRepository.findByStudentAndStatusIn(
-                        studentId, defaultActiveStatuses);
-                responseStatus = "ACTIVE";
-                break;
-        }
+        List<QuestAssignment> approvedQuests = questAssignmentRepository.findApprovedQuestsWithinWeek(
+                studentId, QuestStatus.APPROVED, oneWeekAgo);
+        System.out.println("승인 퀘스트 수: " + approvedQuests.size());
 
         return MyQuestListResponse.builder()
-                .status(responseStatus)
-                .quests(convertToQuestItems(assignments))
-                .totalCount(assignments.size())
+                .activeQuests(convertToQuestItems(activeQuests))
+                .expiredQuests(convertToQuestItems(expiredQuests))
+                .approvedQuests(convertToQuestItems(approvedQuests))
+                .totalCount(activeQuests.size() + expiredQuests.size() + approvedQuests.size())
                 .build();
     }
 
@@ -385,7 +430,6 @@ public class PersonalQuestService {
                     if (assignment.getSubmission() != null) {
                         submissionSummary = MyQuestListResponse.QuestItem.SubmissionSummary.builder()
                                 .submittedAt(assignment.getSubmission().getSubmittedAt())
-                                .comment(assignment.getSubmission().getComment())
                                 .build();
                     }
 
@@ -399,6 +443,11 @@ public class PersonalQuestService {
                             .status(assignment.getStatus())
                             .createdAt(assignment.getQuest().getCreatedAt())
                             .submission(submissionSummary)
+                            .approvedAt(assignment.getStatus() == QuestStatus.APPROVED &&
+                                    assignment.getSubmission() != null ?
+                                    assignment.getSubmission().getSubmittedAt() : null)
+                            .comment(assignment.getSubmission() != null ?
+                                    assignment.getSubmission().getComment() : null)
                             .build();
                 })
                 .collect(Collectors.toList());

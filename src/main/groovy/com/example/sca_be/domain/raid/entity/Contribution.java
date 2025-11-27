@@ -6,10 +6,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contributions",
@@ -21,7 +17,6 @@ import java.time.LocalDateTime;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class Contribution {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,14 +34,17 @@ public class Contribution {
     @Column(nullable = false)
     private Integer damage = 0; // (Default: 0)
 
-    @CreatedDate
-    @Column(name = "updated_at", updatable = false)
-    private LocalDateTime updatedAt;
-
     @Builder
     public Contribution(Raid raid, Student student, Integer damage) {
         this.raid = raid;
         this.student = student;
         this.damage = (damage != null) ? damage : 0;
+    }
+
+    public void addDamage(Integer amount) {
+        if (amount == null || amount <= 0) {
+            return;
+        }
+        this.damage = (this.damage != null ? this.damage : 0) + amount;
     }
 }

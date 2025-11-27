@@ -5,21 +5,27 @@
 -- 1. Fish (Master Data) - Fish available through gacha
 -- fish_id is auto-generated
 -- Probability calculation:
--- COMMON (70%): 4 fish -> 70/4 = 17.5% each
+-- COMMON (70%): 7 fish -> 70/7 = 10% each
 -- RARE (25%): 4 fish -> 25/4 = 6.25% each
--- LEGENDARY (5%): 2 fish -> 5/2 = 2.5% each
+-- LEGENDARY (5%): 2 fish -> 5/2 = 2.5% each (빈칸으로 표시)
 -- Total: 100%
 INSERT INTO fish (fish_name, grade, probability) VALUES
-('Tropical Fish', 'COMMON', 0.175),
-('Goldfish', 'COMMON', 0.175),
-('Guppy', 'COMMON', 0.175),
-('Neon Tetra', 'COMMON', 0.175),
-('Clownfish', 'RARE', 0.0625),
-('Seahorse', 'RARE', 0.0625),
-('Pufferfish', 'RARE', 0.0625),
-('Stingray', 'RARE', 0.0625),
-('Shark', 'LEGENDARY', 0.025),
-('Orca', 'LEGENDARY', 0.025);
+-- COMMON (7개)
+('열대어', 'COMMON', 0.10),
+('금붕어', 'COMMON', 0.10),
+('구피', 'COMMON', 0.10),
+('네온테트라', 'COMMON', 0.10),
+('흰동가리', 'COMMON', 0.10),
+('해마', 'COMMON', 0.10),
+('복어', 'COMMON', 0.10),
+-- RARE (4개)
+('가오리', 'RARE', 0.0625),
+('상어', 'RARE', 0.0625),
+('범고래', 'RARE', 0.0625),
+('바다거북', 'RARE', 0.0625),
+-- LEGENDARY (2개) - 빈칸으로 표시
+('???', 'LEGENDARY', 0.025),
+('???', 'LEGENDARY', 0.025);
 
 -- 2. Members (User Base Info) - 3 Teachers, 10 Students
 -- member_id is auto-generated
@@ -58,20 +64,20 @@ INSERT INTO classes (teacher_id, class_name, invite_code, grade, subject, descri
 
 -- 5. Students (Student Info) - Assign class and resources to each student
 -- member_id is manually assigned (uses @MapsId from Member)
-INSERT INTO students (member_id, class_id, coral, research_data, correction_factor) VALUES
+INSERT INTO students (member_id, class_id, coral, research_data, grade) VALUES
 -- Grade 3 Class 1 (Teacher Kim) - member_ids 4-7
-(4, 1, 500, 200, 1.0),
-(5, 1, 300, 150, 1.0),
-(6, 1, 450, 180, 1.2),
-(7, 1, 600, 250, 0.9),
+(4, 1, 500, 200, 95.0),
+(5, 1, 300, 150, 88.5),
+(6, 1, 450, 180, 91.2),
+(7, 1, 600, 250, 86.7),
 -- Grade 2 Class 3 (Teacher Lee) - member_ids 8-10
-(8, 2, 400, 160, 1.0),
-(9, 2, 350, 140, 1.1),
-(10, 2, 550, 220, 1.0),
+(8, 2, 400, 160, 90.0),
+(9, 2, 350, 140, 84.3),
+(10, 2, 550, 220, 92.1),
 -- Grade 1 Class 2 (Teacher Park) - member_ids 11-13
-(11, 3, 250, 100, 1.0),
-(12, 3, 300, 120, 1.0),
-(13, 3, 400, 160, 0.8);
+(11, 3, 250, 100, 80.0),
+(12, 3, 300, 120, 82.4),
+(13, 3, 400, 160, 89.5);
 
 -- 6. Collections (Student Gacha Collections)
 -- collection_id is auto-generated
@@ -96,6 +102,7 @@ INSERT INTO collection_entries (collection_id, fish_id, fish_count) VALUES
 (1, 2, 2),
 (1, 5, 1),
 (1, 9, 1),
+(1, 10, 1),
 -- Student 5 (Kim Cheolsu) - collection_id will be 2
 (2, 1, 5),
 (2, 3, 2),
@@ -205,27 +212,27 @@ INSERT INTO group_quest_progress (group_quest_id, student_id, is_completed, comp
 
 -- 13. Raids (Raids)
 -- raid_id is auto-generated
-INSERT INTO raids (teacher_id, class_id, start_date, end_date, total_boss_hp, current_boss_hp, reward_coral, special_reward_description, status, difficulty, boss_type) VALUES
-(1, 1, '2025-11-10 00:00:00', '2025-11-20 23:59:59', 10000, 3500, 200, 'Legendary grade fish acquisition opportunity', 'ACTIVE', 'HIGH', 'KRAKEN'),
-(2, 2, '2025-11-05 00:00:00', '2025-11-12 23:59:59', 5000, 0, 150, 'Rare grade fish x3', 'COMPLETED', 'MEDIUM', 'ZELUS_INDUSTRY'),
-(3, 3, '2025-11-15 00:00:00', '2025-11-22 23:59:59', 3000, 2100, 100, 'Common grade fish x10', 'ACTIVE', 'LOW', 'KRAKEN');
+INSERT INTO raids (teacher_id, class_id, raid_name, boss_type, difficulty, status, start_date, end_date, total_boss_hp, current_boss_hp, reward_coral, special_reward_description) VALUES
+(1, 1, '중간고사 대비 크라켄', 'KRAKEN', 'HIGH', 'ACTIVE', '2025-11-10 00:00:00', '2025-11-20 23:59:59', 10000, 3500, 200, 'Legendary grade fish acquisition opportunity'),
+(2, 2, '헬릭스 인더스트리 소탕전', 'ZELUS_INDUSTRY', 'MEDIUM', 'COMPLETED', '2025-11-05 00:00:00', '2025-11-12 23:59:59', 5000, 0, 150, 'Rare grade fish x3'),
+(3, 3, '기말 대비 정찰 작전', 'KRAKEN', 'LOW', 'ACTIVE', '2025-11-15 00:00:00', '2025-11-22 23:59:59', 3000, 2100, 100, 'Common grade fish x10');
 
 -- 14. Contributions (Raid Contributions)
 -- contribution_id is auto-generated
-INSERT INTO contributions (raid_id, student_id, damage, updated_at) VALUES
+INSERT INTO contributions (raid_id, student_id, damage) VALUES
 -- Raid 1 contributions (Grade 3 Class 1)
-(1, 4, 2000, '2025-11-15 14:00:00'),
-(1, 5, 1500, '2025-11-15 15:00:00'),
-(1, 6, 1800, '2025-11-15 16:00:00'),
-(1, 7, 1200, '2025-11-15 17:00:00'),
+(1, 4, 2000),
+(1, 5, 1500),
+(1, 6, 1800),
+(1, 7, 1200),
 -- Raid 2 contributions (Grade 2 Class 3 - Completed)
-(2, 8, 2000, '2025-11-12 10:00:00'),
-(2, 9, 1800, '2025-11-12 11:00:00'),
-(2, 10, 1200, '2025-11-12 12:00:00'),
+(2, 8, 2000),
+(2, 9, 1800),
+(2, 10, 1200),
 -- Raid 3 contributions (Grade 1 Class 2)
-(3, 11, 300, '2025-11-16 09:00:00'),
-(3, 12, 400, '2025-11-16 10:00:00'),
-(3, 13, 200, '2025-11-16 11:00:00');
+(3, 11, 300),
+(3, 12, 400),
+(3, 13, 200);
 
 -- 15. Notices (Notifications)
 -- notice_id is auto-generated
@@ -239,14 +246,14 @@ INSERT INTO notice (notice_type, student_id, assignment_id, group_quest_id, raid
 
 -- 16. Action Logs (Activity Logs)
 -- log_id is auto-generated
-INSERT INTO action_logs (student_id, action_type, change_coral, change_research, reference_id, log_message, assignment_id, group_quest_id, raid_id, created_at) VALUES
-(4, 'REWARD_RECEIVED', 100, 50, 1, 'Math workbook practice quest completion reward', 1, NULL, NULL, NOW()),
-(7, 'REWARD_RECEIVED', 90, 45, 1, 'Math workbook practice quest completion reward', 4, NULL, NULL, NOW()),
-(4, 'GROUP_QUEST_COMPLETE', 100, 50, 2, 'Math assignment 100% completion reward', NULL, 2, NULL, NOW()),
-(5, 'GROUP_QUEST_COMPLETE', 100, 50, 2, 'Math assignment 100% completion reward', NULL, 2, NULL, NOW()),
-(8, 'RAID_REWARD_RECEIVED', 150, 0, 2, 'Zelus Industry raid completion reward', NULL, NULL, 2, NOW()),
-(9, 'RAID_REWARD_RECEIVED', 150, 0, 2, 'Zelus Industry raid completion reward', NULL, NULL, 2, NOW()),
-(12, 'REWARD_RECEIVED', 100, 50, 5, 'My Dream essay writing completion reward', 12, NULL, NULL, NOW());
+INSERT INTO action_logs (student_id, action_type, assignment_id, group_quest_id, raid_id, change_coral, change_research, log_message, created_at) VALUES
+(4, 'REWARD_RECEIVED', 1, NULL, NULL, 100, 50, 'Math workbook practice quest completion reward', NOW()),
+(7, 'REWARD_RECEIVED', 4, NULL, NULL, 90, 45, 'Math workbook practice quest completion reward', NOW()),
+(4, 'GROUP_QUEST_COMPLETE', NULL, 2, NULL, 100, 50, 'Math assignment 100% completion reward', NOW()),
+(5, 'GROUP_QUEST_COMPLETE', NULL, 2, NULL, 100, 50, 'Math assignment 100% completion reward', NOW()),
+(8, 'RAID_REWARD_RECEIVED', NULL, NULL, 2, 150, 0, 'Zelus Industry raid completion reward', NOW()),
+(9, 'RAID_REWARD_RECEIVED', NULL, NULL, 2, 150, 0, 'Zelus Industry raid completion reward', NOW()),
+(12, 'REWARD_RECEIVED', 12, NULL, NULL, 100, 50, 'My Dream essay writing completion reward', NOW());
 
 -- ============================================
 -- Data Initialization Complete

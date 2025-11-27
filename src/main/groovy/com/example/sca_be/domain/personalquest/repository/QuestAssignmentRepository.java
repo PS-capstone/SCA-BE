@@ -42,8 +42,10 @@ public interface QuestAssignmentRepository extends JpaRepository<QuestAssignment
     // 학생의 퀘스트 목록 조회 (상태별)
     @Query("SELECT qa FROM QuestAssignment qa " +
            "JOIN FETCH qa.quest q " +
-           "LEFT JOIN FETCH qa.submission s " +
-           "WHERE qa.student.memberId = :studentId " +
+           "JOIN FETCH qa.student s " +
+           "JOIN FETCH s.member m " +
+           "LEFT JOIN FETCH qa.submission sub " +
+           "WHERE s.memberId = :studentId " +
            "AND qa.status IN :statuses")
     List<QuestAssignment> findByStudentAndStatusIn(
         @Param("studentId") Integer studentId,
@@ -53,7 +55,8 @@ public interface QuestAssignmentRepository extends JpaRepository<QuestAssignment
     // 학생의 만료된 퀘스트 조회 (일주일 이내)
     @Query("SELECT qa FROM QuestAssignment qa " +
            "JOIN FETCH qa.quest q " +
-           "WHERE qa.student.memberId = :studentId " +
+           "JOIN FETCH qa.student s " +
+           "WHERE s.memberId = :studentId " +
            "AND qa.status = :status " +
            "AND q.createdAt >= :oneWeekAgo")
     List<QuestAssignment> findExpiredQuestsWithinWeek(
@@ -65,10 +68,11 @@ public interface QuestAssignmentRepository extends JpaRepository<QuestAssignment
     // 학생의 승인된 퀘스트 조회 (일주일 이내)
     @Query("SELECT qa FROM QuestAssignment qa " +
            "JOIN FETCH qa.quest q " +
-           "LEFT JOIN FETCH qa.submission s " +
-           "WHERE qa.student.memberId = :studentId " +
+           "JOIN FETCH qa.student s " +
+           "LEFT JOIN FETCH qa.submission sub " +
+           "WHERE s.memberId = :studentId " +
            "AND qa.status = :status " +
-           "AND s.submittedAt >= :oneWeekAgo")
+           "AND sub.submittedAt >= :oneWeekAgo")
     List<QuestAssignment> findApprovedQuestsWithinWeek(
         @Param("studentId") Integer studentId,
         @Param("status") QuestStatus status,

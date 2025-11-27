@@ -21,9 +21,6 @@ public class QuestCreateRequest {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime deadline;
 
-    @JsonProperty("class_id")
-    private Integer classId;
-
     @JsonProperty("reward_coral_default")
     private Integer rewardCoralDefault;
 
@@ -31,7 +28,10 @@ public class QuestCreateRequest {
     private Integer rewardResearchDataDefault;
 
     @JsonProperty("ai_used")
-    private Boolean aiUsed; // AI 사용 여부 (무시됨)
+    private Boolean aiUsed; // AI 사용 여부
+
+    @JsonProperty("class_id")
+    private Integer classId; // 선택적 필드 (현재는 사용하지 않지만 프론트엔드 호환성을 위해 추가)
 
     private List<AssignmentRequest> assignments;
 
