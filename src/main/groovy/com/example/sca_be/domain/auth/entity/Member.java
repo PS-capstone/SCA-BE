@@ -6,11 +6,17 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "members")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE members SET deleted_at = NOW() WHERE member_id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Member extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +41,10 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING) //학생 혹은 선생님
     @Column(nullable = false, length = 20)
     private Role role;
-    
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     //created at는 자동생성
 
     //이걸로 member 객체에서 .getStudent()로 학생 정보 접근 가능
@@ -53,5 +62,10 @@ public class Member extends BaseTimeEntity {
         this.nickname = nickname;
         this.email = email;
         this.role = role;
+    }
+
+    // 삭제 복구 메서드
+    public void recover() {
+        this.deletedAt = null;
     }
 }

@@ -31,22 +31,23 @@ INSERT INTO fish (fish_name, grade, probability) VALUES
 -- member_id is auto-generated
 -- Password: "password123" (BCrypt Hash)
 -- BCrypt Hash: $2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq
-INSERT INTO members (username, password, real_name, nickname, email, role, created_at) VALUES
+-- deleted_at is NULL for active users (Soft Delete)
+INSERT INTO members (username, password, real_name, nickname, email, role, created_at, deleted_at) VALUES
 -- Teachers
-('teacher1', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Kim Teacher', 'Teacher Kim', 'teacher1@sca.edu', 'TEACHER', NOW()),
-('teacher2', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Lee Teacher', 'Teacher Lee', 'teacher2@sca.edu', 'TEACHER', NOW()),
-('teacher3', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Park Teacher', 'Teacher Park', 'teacher3@sca.edu', 'TEACHER', NOW()),
+('teacher1', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Kim Teacher', 'Teacher Kim', 'teacher1@sca.edu', 'TEACHER', NOW(), NULL),
+('teacher2', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Lee Teacher', 'Teacher Lee', 'teacher2@sca.edu', 'TEACHER', NOW(), NULL),
+('teacher3', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Park Teacher', 'Teacher Park', 'teacher3@sca.edu', 'TEACHER', NOW(), NULL),
 -- Students
-('student1', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Hong Gildong', 'Gildong', 'student1@sca.edu', 'STUDENT', NOW()),
-('student2', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Kim Cheolsu', 'Cheolsu', 'student2@sca.edu', 'STUDENT', NOW()),
-('student3', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Lee Younghee', 'Younghee', 'student3@sca.edu', 'STUDENT', NOW()),
-('student4', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Park Minsu', 'Minsu', 'student4@sca.edu', 'STUDENT', NOW()),
-('student5', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Choi Jieun', 'Jieun', 'student5@sca.edu', 'STUDENT', NOW()),
-('student6', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Jung Suhyun', 'Suhyun', 'student6@sca.edu', 'STUDENT', NOW()),
-('student7', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Kang Minjun', 'Minjun', 'student7@sca.edu', 'STUDENT', NOW()),
-('student8', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Cho Seoyeon', 'Seoyeon', 'student8@sca.edu', 'STUDENT', NOW()),
-('student9', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Yoon Haneul', 'Haneul', 'student9@sca.edu', 'STUDENT', NOW()),
-('student10', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Jang Seojun', 'Seojun', 'student10@sca.edu', 'STUDENT', NOW());
+('student1', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Hong Gildong', 'Gildong', 'student1@sca.edu', 'STUDENT', NOW(), NULL),
+('student2', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Kim Cheolsu', 'Cheolsu', 'student2@sca.edu', 'STUDENT', NOW(), NULL),
+('student3', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Lee Younghee', 'Younghee', 'student3@sca.edu', 'STUDENT', NOW(), NULL),
+('student4', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Park Minsu', 'Minsu', 'student4@sca.edu', 'STUDENT', NOW(), NULL),
+('student5', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Choi Jieun', 'Jieun', 'student5@sca.edu', 'STUDENT', NOW(), NULL),
+('student6', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Jung Suhyun', 'Suhyun', 'student6@sca.edu', 'STUDENT', NOW(), NULL),
+('student7', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Kang Minjun', 'Minjun', 'student7@sca.edu', 'STUDENT', NOW(), NULL),
+('student8', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Cho Seoyeon', 'Seoyeon', 'student8@sca.edu', 'STUDENT', NOW(), NULL),
+('student9', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Yoon Haneul', 'Haneul', 'student9@sca.edu', 'STUDENT', NOW(), NULL),
+('student10', '$2a$10$sp2WRqBmMCocuoe0zXyiYOG0VQriJ6w98sZs337HQl7hbxEpA4xKq', 'Jang Seojun', 'Seojun', 'student10@sca.edu', 'STUDENT', NOW(), NULL);
 
 -- 3. Teachers (Teacher Info)
 -- member_id is manually assigned (uses @MapsId from Member)
@@ -57,10 +58,11 @@ INSERT INTO teachers (member_id) VALUES
 
 -- 4. Classes (Class Info) - Each teacher manages one class
 -- class_id is auto-generated
-INSERT INTO classes (teacher_id, class_name, invite_code, grade, subject, description, created_at) VALUES
-(1, 'Grade 3 Class 1', 'INVITE001', 'Grade 3', 'Math', 'Fun Math Class', NOW()),
-(2, 'Grade 2 Class 3', 'INVITE002', 'Grade 2', 'Science', 'Exciting Science Lab', NOW()),
-(3, 'Grade 1 Class 2', 'INVITE003', 'Grade 1', 'English', 'Enjoyable English Class', NOW());
+-- deleted_at is NULL for active classes (Soft Delete)
+INSERT INTO classes (teacher_id, class_name, invite_code, grade, subject, description, created_at, deleted_at) VALUES
+(1, 'Grade 3 Class 1', 'INVITE001', 'Grade 3', 'Math', 'Fun Math Class', NOW(), NULL),
+(2, 'Grade 2 Class 3', 'INVITE002', 'Grade 2', 'Science', 'Exciting Science Lab', NOW(), NULL),
+(3, 'Grade 1 Class 2', 'INVITE003', 'Grade 1', 'English', 'Enjoyable English Class', NOW(), NULL);
 
 -- 5. Students (Student Info) - Assign class and resources to each student
 -- member_id is manually assigned (uses @MapsId from Member)
@@ -139,12 +141,14 @@ INSERT INTO collection_entries (collection_id, fish_id, fish_count) VALUES
 
 -- 8. Personal Quests (Individual Quests)
 -- quest_id is auto-generated
-INSERT INTO quests (teacher_id, title, teacher_content, reward_coral_default, reward_research_data_default, deadline, difficulty, created_at) VALUES
-(1, 'Math Workbook Practice', 'Complete Chapter 1 of the 2nd semester math workbook and submit photos.', 100, 50, '2025-12-31 23:59:59', 3, NOW()),
-(1, 'Geometry Project', 'Submit a creative project using properties of triangles.', 200, 100, '2025-12-25 23:59:59', 5, NOW()),
-(2, 'Science Experiment Report', 'Conduct water boiling point experiment and write a report.', 150, 75, '2025-12-20 23:59:59', 4, NOW()),
-(2, 'Ecosystem Observation Journal', 'Observe the ecosystem around school and keep a journal for one week.', 120, 60, '2025-12-28 23:59:59', 3, NOW()),
-(3, 'English Essay Writing', 'Write an essay on "My Dream" with at least 200 words.', 100, 50, '2025-12-22 23:59:59', 4, NOW());
+-- difficulty: 1 (EASY), 2 (BASIC), 3 (MEDIUM), 4 (HARD), 5 (VERY_HARD)
+-- deleted_at is NULL for active quests (Soft Delete)
+INSERT INTO quests (teacher_id, title, teacher_content, reward_coral_default, reward_research_data_default, deadline, difficulty, created_at, deleted_at) VALUES
+(1, 'Math Workbook Practice', 'Complete Chapter 1 of the 2nd semester math workbook and submit photos.', 100, 50, '2025-12-31 23:59:59', 3, NOW(), NULL),
+(1, 'Geometry Project', 'Submit a creative project using properties of triangles.', 200, 100, '2025-12-25 23:59:59', 5, NOW(), NULL),
+(2, 'Science Experiment Report', 'Conduct water boiling point experiment and write a report.', 150, 75, '2025-12-20 23:59:59', 4, NOW(), NULL),
+(2, 'Ecosystem Observation Journal', 'Observe the ecosystem around school and keep a journal for one week.', 120, 60, '2025-12-28 23:59:59', 3, NOW(), NULL),
+(3, 'English Essay Writing', 'Write an essay on "My Dream" with at least 200 words.', 100, 50, '2025-12-22 23:59:59', 4, NOW(), NULL);
 
 -- 9. Quest Assignments (Individual Quest Assignments)
 -- assignment_id is auto-generated
@@ -254,6 +258,111 @@ INSERT INTO action_logs (student_id, action_type, assignment_id, group_quest_id,
 (8, 'RAID_REWARD_RECEIVED', NULL, NULL, 2, 150, 0, 'Zelus Industry raid completion reward', NOW()),
 (9, 'RAID_REWARD_RECEIVED', NULL, NULL, 2, 150, 0, 'Zelus Industry raid completion reward', NOW()),
 (12, 'REWARD_RECEIVED', 12, NULL, NULL, 100, 50, 'My Dream essay writing completion reward', NOW());
+
+-- ============================================
+-- AI Learning System Data (students_factors, students_quest_factors, ai_learning_logs)
+-- ============================================
+
+-- 17. Students Factors (학생 보정계수)
+-- id is auto-generated
+-- All students get initial factors based on their grades
+INSERT INTO students_factors (student_id, global_factor, initialized, initial_score, initialized_at, total_learning_count, last_learning_at, avg_modification_rate, created_at, updated_at) VALUES
+-- Grade 3 Class 1 students
+(4, 0.95, true, 95, NOW(), 10, NOW(), 0.08, NOW(), NOW()),   -- Hong Gildong (high performer)
+(5, 1.065, true, 88, NOW(), 8, NOW(), 0.12, NOW(), NOW()),   -- Kim Cheolsu
+(6, 0.988, true, 91, NOW(), 9, NOW(), 0.09, NOW(), NOW()),   -- Lee Younghee
+(7, 1.083, true, 86, NOW(), 7, NOW(), 0.15, NOW(), NOW()),   -- Park Minsu
+-- Grade 2 Class 3 students
+(8, 1.0, true, 90, NOW(), 12, NOW(), 0.10, NOW(), NOW()),    -- Choi Jieun
+(9, 1.107, true, 84, NOW(), 5, NOW(), 0.18, NOW(), NOW()),   -- Jung Suhyun
+(10, 0.979, true, 92, NOW(), 11, NOW(), 0.07, NOW(), NOW()), -- Kang Minjun
+-- Grade 1 Class 2 students
+(11, 1.25, true, 80, NOW(), 3, NOW(), 0.25, NOW(), NOW()),   -- Cho Seoyeon (needs more support)
+(12, 1.176, true, 82, NOW(), 4, NOW(), 0.20, NOW(), NOW()),  -- Yoon Haneul
+(13, 1.055, true, 89, NOW(), 6, NOW(), 0.13, NOW(), NOW());  -- Jang Seojun
+
+-- 18. Students Quest Factors (학생 난이도별 보정계수)
+-- id is auto-generated
+-- Each student has difficulty-specific factors
+-- difficulty: 1 (EASY), 2 (BASIC), 3 (MEDIUM), 4 (HARD), 5 (VERY_HARD)
+INSERT INTO students_quest_factors (student_factor_id, difficulty, factor_value, learning_count, created_at, updated_at) VALUES
+-- Student 4 (Hong Gildong - id 1) - High performer
+(1, 1, 0.80, 2, NOW(), NOW()),
+(1, 2, 0.85, 2, NOW(), NOW()),
+(1, 3, 0.90, 3, NOW(), NOW()),
+(1, 4, 0.95, 2, NOW(), NOW()),
+(1, 5, 1.00, 1, NOW(), NOW()),
+-- Student 5 (Kim Cheolsu - id 2)
+(2, 1, 0.90, 2, NOW(), NOW()),
+(2, 2, 0.95, 2, NOW(), NOW()),
+(2, 3, 1.05, 2, NOW(), NOW()),
+(2, 4, 1.10, 1, NOW(), NOW()),
+(2, 5, 1.15, 1, NOW(), NOW()),
+-- Student 6 (Lee Younghee - id 3)
+(3, 1, 0.85, 2, NOW(), NOW()),
+(3, 2, 0.90, 2, NOW(), NOW()),
+(3, 3, 0.95, 3, NOW(), NOW()),
+(3, 4, 1.00, 1, NOW(), NOW()),
+(3, 5, 1.05, 1, NOW(), NOW()),
+-- Student 7 (Park Minsu - id 4)
+(4, 1, 0.95, 2, NOW(), NOW()),
+(4, 2, 1.00, 1, NOW(), NOW()),
+(4, 3, 1.10, 2, NOW(), NOW()),
+(4, 4, 1.15, 1, NOW(), NOW()),
+(4, 5, 1.20, 1, NOW(), NOW()),
+-- Student 8 (Choi Jieun - id 5)
+(5, 1, 0.85, 3, NOW(), NOW()),
+(5, 2, 0.90, 3, NOW(), NOW()),
+(5, 3, 1.00, 3, NOW(), NOW()),
+(5, 4, 1.05, 2, NOW(), NOW()),
+(5, 5, 1.10, 1, NOW(), NOW()),
+-- Student 9 (Jung Suhyun - id 6)
+(6, 1, 1.00, 1, NOW(), NOW()),
+(6, 2, 1.05, 1, NOW(), NOW()),
+(6, 3, 1.15, 2, NOW(), NOW()),
+(6, 4, 1.20, 1, NOW(), NOW()),
+(6, 5, 1.25, 0, NOW(), NOW()),
+-- Student 10 (Kang Minjun - id 7)
+(7, 1, 0.80, 3, NOW(), NOW()),
+(7, 2, 0.85, 3, NOW(), NOW()),
+(7, 3, 0.95, 3, NOW(), NOW()),
+(7, 4, 1.00, 1, NOW(), NOW()),
+(7, 5, 1.05, 1, NOW(), NOW()),
+-- Student 11 (Cho Seoyeon - id 8)
+(8, 1, 1.10, 1, NOW(), NOW()),
+(8, 2, 1.15, 1, NOW(), NOW()),
+(8, 3, 1.30, 1, NOW(), NOW()),
+(8, 4, 1.35, 0, NOW(), NOW()),
+(8, 5, 1.40, 0, NOW(), NOW()),
+-- Student 12 (Yoon Haneul - id 9)
+(9, 1, 1.05, 1, NOW(), NOW()),
+(9, 2, 1.10, 1, NOW(), NOW()),
+(9, 3, 1.20, 1, NOW(), NOW()),
+(9, 4, 1.25, 1, NOW(), NOW()),
+(9, 5, 1.30, 0, NOW(), NOW()),
+-- Student 13 (Jang Seojun - id 10)
+(10, 1, 0.95, 2, NOW(), NOW()),
+(10, 2, 1.00, 1, NOW(), NOW()),
+(10, 3, 1.10, 2, NOW(), NOW()),
+(10, 4, 1.15, 1, NOW(), NOW()),
+(10, 5, 1.20, 0, NOW(), NOW());
+
+-- 19. AI Learning Logs (AI 학습 로그)
+-- id is auto-generated
+-- Sample learning logs for approved quest assignments
+-- difficulty: 1 (EASY), 2 (BASIC), 3 (MEDIUM), 4 (HARD), 5 (VERY_HARD)
+INSERT INTO ai_learning_logs (assignment_id, student_id, difficulty, cognitive_score, effort_score, ai_coral, ai_research_data, teacher_coral, teacher_research_data, learned, learned_at, created_at) VALUES
+-- Assignment 1: Student 4, Quest 1 (difficulty 3 - MEDIUM) - APPROVED
+(1, 4, 3, 4, 6, 95, 48, 100, 50, true, NOW(), NOW()),
+-- Assignment 4: Student 7, Quest 1 (difficulty 3 - MEDIUM) - APPROVED
+(4, 7, 3, 3, 7, 85, 42, 90, 45, true, NOW(), NOW()),
+-- Assignment 7: Student 8, Quest 3 (difficulty 4 - HARD) - APPROVED
+(7, 8, 4, 5, 8, 145, 72, 150, 75, true, NOW(), NOW()),
+-- Assignment 12: Student 12, Quest 5 (difficulty 4 - HARD) - APPROVED
+(12, 12, 4, 4, 7, 95, 48, 100, 50, true, NOW(), NOW()),
+-- Additional learning logs (some not yet learned)
+(2, 5, 3, 4, 6, 98, 49, 100, 50, false, NULL, NOW()),
+(8, 9, 4, 3, 8, 155, 77, 165, 82, false, NULL, NOW());
 
 -- ============================================
 -- Data Initialization Complete

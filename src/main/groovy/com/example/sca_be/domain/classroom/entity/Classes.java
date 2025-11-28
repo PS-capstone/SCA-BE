@@ -8,7 +8,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +19,8 @@ import java.util.List;
 @Table(name = "classes")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE classes SET deleted_at = NOW() WHERE class_id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Classes extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,6 +46,9 @@ public class Classes extends BaseTimeEntity {
     @Column(length = 100)
     private String description;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @OneToMany(mappedBy = "classes")
     private List<Student> students = new ArrayList<>();
 
@@ -52,5 +60,10 @@ public class Classes extends BaseTimeEntity {
         this.grade = grade;
         this.subject = subject;
         this.description = description;
+    }
+
+    // 삭제 복구 메서드
+    public void recover() {
+        this.deletedAt = null;
     }
 }

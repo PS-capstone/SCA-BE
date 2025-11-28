@@ -5,10 +5,14 @@ import com.example.sca_be.global.common.BaseTimeEntity;
 import com.example.sca_be.domain.auth.entity.Member;
 import com.example.sca_be.domain.personalquest.entity.QuestAssignment;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,6 +22,8 @@ import java.util.List;
 @Table(name = "quests")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE quests SET deleted_at = NOW() WHERE quest_id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Quest extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,8 +50,13 @@ public class Quest extends BaseTimeEntity {
     @Column(name = "deadline")
     private LocalDateTime deadline;
 
+    @Min(1)
+    @Max(5)
     @Column(name = "difficulty")
     private Integer difficulty;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     // 이 퀘스트가 누구에게 할당되었는지 QuestAssignment를 통해 참조.
     @OneToMany(mappedBy = "quest", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -59,6 +70,14 @@ public class Quest extends BaseTimeEntity {
         this.rewardCoralDefault = rewardCoralDefault;
         this.rewardResearchDataDefault = rewardResearchDataDefault;
         this.deadline = deadline;
+        if (difficulty != null && (difficulty < 1 || difficulty > 5)) {
+            throw new IllegalArgumentException("Difficulty must be between 1 and 5");
+        }
         this.difficulty = difficulty;
+    }
+
+    // 삭제 복구 메서드
+    public void recover() {
+        this.deletedAt = null;
     }
 }
