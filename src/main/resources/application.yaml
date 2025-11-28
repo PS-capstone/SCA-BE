@@ -21,6 +21,14 @@ spring:
     endpoint:
       health:
         show-details: always
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.3
+          top-p: 0.9
 
 cloud:
   aws:
@@ -33,3 +41,5 @@ cloud:
       static: ap-northeast-2
     stack:
       auto: false
+
+

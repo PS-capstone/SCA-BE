@@ -16,4 +16,10 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
     
     @Query("SELECT s FROM Student s LEFT JOIN FETCH s.classes WHERE s.memberId = :memberId")
     Optional<Student> findByIdWithClasses(@Param("memberId") Integer memberId);
+
+    @Query("SELECT s FROM Student s JOIN FETCH s.member WHERE s.memberId = :memberId")
+    Optional<Student> findByIdWithMember(@Param("memberId") Integer memberId);
+
+    @Query("SELECT s FROM Student s JOIN FETCH s.member WHERE s.memberId IN :memberIds")
+    List<Student> findByIdsWithMember(@Param("memberIds") List<Integer> memberIds);
 }

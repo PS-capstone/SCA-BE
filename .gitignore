@@ -61,7 +61,9 @@ logs/
 
 ### Application-specific ###
 application-local.yml
+application-local.yaml
 application-dev.yml
+application-dev.yaml
 application-prod.yml
 *-local.properties
 
