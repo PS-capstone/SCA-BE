@@ -1,5 +1,13 @@
 package com.example.sca_be.domain.personalquest.service;
 
+import com.example.sca_be.domain.ai.dto.BaseReward;
+import com.example.sca_be.domain.ai.dto.LearningEvent;
+import com.example.sca_be.domain.ai.dto.PersonalizedReward;
+import com.example.sca_be.domain.ai.dto.QuestAnalysisResult;
+import com.example.sca_be.domain.ai.entity.QuestDifficulty;
+import com.example.sca_be.domain.ai.service.LearningEngineService;
+import com.example.sca_be.domain.ai.service.QuestAnalyzerService;
+import com.example.sca_be.domain.ai.service.StudentFactorService;
 import com.example.sca_be.domain.auth.entity.Student;
 import com.example.sca_be.domain.auth.entity.Teacher;
 import com.example.sca_be.domain.auth.repository.StudentRepository;
@@ -15,6 +23,7 @@ import com.example.sca_be.domain.personalquest.repository.QuestAssignmentReposit
 import com.example.sca_be.domain.personalquest.repository.QuestRepository;
 import com.example.sca_be.domain.personalquest.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +31,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -34,6 +45,9 @@ public class PersonalQuestService {
     private final SubmissionRepository submissionRepository;
     private final StudentRepository studentRepository;
     private final TeacherRepository teacherRepository;
+    private final QuestAnalyzerService questAnalyzerService;
+    private final StudentFactorService studentFactorService;
+    private final LearningEngineService learningEngineService;
 
     /**
      * 퀘스트 생성 및 할당
@@ -128,8 +142,13 @@ public class PersonalQuestService {
                             .build();
                 })
                 .collect(Collectors.toList());
-        
+
         System.out.println("Response 생성 완료 - " + assignmentInfos.size() + "개의 할당 정보 포함");
+
+        // 학습 엔진 실행 (AI 사용 시 + 수정 발생 시)
+        if (Boolean.TRUE.equals(request.getAiUsed())) {
+            triggerLearning(request, assignments);
+        }
 
         return QuestCreateResponse.builder()
                 .questId(savedQuest.getQuestId())
@@ -146,34 +165,173 @@ public class PersonalQuestService {
     }
 
     /**
-     * AI 보상 추천 (하드코딩)
+     * 학습 엔진 트리거
+     * AI 추천과 선생님 최종값이 다른 경우 비동기로 학습 실행
+     */
+    private void triggerLearning(QuestCreateRequest request, List<QuestAssignment> assignments) {
+        log.info("Triggering learning for {} assignments", assignments.size());
+
+        for (int i = 0; i < request.getAssignments().size(); i++) {
+            QuestCreateRequest.AssignmentRequest assignmentReq = request.getAssignments().get(i);
+            QuestAssignment savedAssignment = assignments.get(i);
+
+            // AI 추천값과 선생님 최종값 비교
+            boolean coralModified = !assignmentReq.getAiRewardCoral().equals(assignmentReq.getRewardCoralPersonal());
+            boolean researchModified = !assignmentReq.getAiRewardResearchData().equals(assignmentReq.getRewardResearchDataPersonal());
+
+            if (coralModified || researchModified) {
+                log.info("Modification detected for student {}, triggering learning",
+                        savedAssignment.getStudent().getMemberId());
+
+                // cognitive_score와 effort_score를 AI 추천값으로부터 역산
+                int cognitiveScore = estimateCognitiveScore(
+                        assignmentReq.getAiRewardCoral(),
+                        assignmentReq.getAiRewardResearchData()
+                );
+                int effortScore = estimateEffortScore(
+                        assignmentReq.getAiRewardCoral(),
+                        assignmentReq.getAiRewardResearchData()
+                );
+
+                // 학습 이벤트 생성 및 비동기 실행
+                LearningEvent event = LearningEvent.builder()
+                        .studentId(savedAssignment.getStudent().getMemberId())
+                        .assignmentId(savedAssignment.getAssignmentId())
+                        .difficulty(request.getDifficulty())
+                        .cognitiveScore(cognitiveScore)
+                        .effortScore(effortScore)
+                        .aiCoral(assignmentReq.getAiRewardCoral())
+                        .aiResearchData(assignmentReq.getAiRewardResearchData())
+                        .teacherCoral(assignmentReq.getRewardCoralPersonal())
+                        .teacherResearchData(assignmentReq.getRewardResearchDataPersonal())
+                        .build();
+
+                learningEngineService.learnAsync(event);
+            } else {
+                log.debug("No modification for student {}, skipping learning",
+                        savedAssignment.getStudent().getMemberId());
+            }
+        }
+    }
+
+    /**
+     * AI 추천 보상으로부터 인지 점수 추정 (폴백)
+     * 프론트엔드에서 cognitive_score를 전달하지 않은 경우 사용
+     */
+    private int estimateCognitiveScore(int coral, int researchData) {
+        // coral = (effort × 5) + (cognitive × 2)
+        // researchData = (cognitive² × 5) + (effort × 2)
+        // 간단한 추정: coral 기반
+        return Math.max(1, Math.min(6, (coral - 20) / 10));
+    }
+
+    /**
+     * AI 추천 보상으로부터 노력 점수 추정 (폴백)
+     * 프론트엔드에서 effort_score를 전달하지 않은 경우 사용
+     */
+    private int estimateEffortScore(int coral, int researchData) {
+        // coral = (effort × 5) + (cognitive × 2)
+        // 간단한 추정
+        return Math.max(1, Math.min(10, coral / 6));
+    }
+
+    /**
+     * AI 보상 추천
+     * PDF 1.2 참고: CompletableFuture로 병렬 처리
      */
     public AIRecommendResponse recommendRewards(AIRecommendRequest request) {
-        // 하드코딩된 데이터 반환
-        List<AIRecommendResponse.RecommendationInfo> recommendations = new ArrayList<>();
+        log.info("AI reward recommendation started for {} students", request.getStudentIds().size());
 
-        for (Integer studentId : request.getStudentIds()) {
-            // 학생 정보 조회 (이름만 가져오기 위함)
-            Student student = studentRepository.findById(studentId)
-                    .orElse(null);
+        try {
+            // 퀘스트 텍스트 생성
+            String questText = request.getQuestTitle() + "\n" + request.getQuestContent();
+            QuestDifficulty difficulty = mapIntToDifficulty(request.getDifficulty());
 
-            String studentName = student != null ? student.getMember().getRealName() : "학생" + studentId;
+            // Step 1: 병렬 처리 시작
+            // Task A: AI 퀘스트 분석 (비동기)
+            CompletableFuture<QuestAnalysisResult> analysisFuture = CompletableFuture.supplyAsync(() -> {
+                log.debug("Task A: Starting quest analysis");
+                return questAnalyzerService.analyzeQuest(questText, difficulty);
+            });
 
-            // 하드코딩된 추천 값
-            recommendations.add(AIRecommendResponse.RecommendationInfo.builder()
-                    .studentId(studentId)
-                    .studentName(studentName)
-                    .recommendedCoral(50)
-                    .recommendedResearchData(30)
-                    .reason("기본 보상 적용")
-                    .build());
+            // Task B: 학생 정보 조회 (비동기) - Member를 fetch join으로 즉시 로딩
+            CompletableFuture<List<Student>> studentsFuture = CompletableFuture.supplyAsync(() -> {
+                log.debug("Task B: Fetching student information");
+                return studentRepository.findByIdsWithMember(request.getStudentIds());
+            });
+
+            // Step 2: 두 작업 완료 대기 (약 500ms)
+            CompletableFuture.allOf(analysisFuture, studentsFuture).join();
+
+            QuestAnalysisResult analysis = analysisFuture.get();
+            List<Student> students = studentsFuture.get();
+
+            log.info("Analysis completed - Cognitive: {}, Effort: {}, Difficulty: {}",
+                    analysis.getCognitiveProcessScore(),
+                    analysis.getEffortScore(),
+                    analysis.getDifficulty());
+
+            // Step 3: 기본 보상 계산
+            BaseReward baseReward = StudentFactorService.calculateBaseReward(
+                    analysis.getCognitiveProcessScore(),
+                    analysis.getEffortScore()
+            );
+
+            log.debug("Base reward calculated - Exploration: {}, Coral: {}",
+                    baseReward.getExplorationData(), baseReward.getCoral());
+
+            // Step 4: 각 학생별 개인화 보상 계산
+            List<AIRecommendResponse.RecommendationInfo> recommendations = students.stream()
+                    .map(student -> {
+                        PersonalizedReward personalizedReward = studentFactorService.calculatePersonalizedReward(
+                                student.getMemberId(),
+                                analysis.getCognitiveProcessScore(),
+                                analysis.getEffortScore(),
+                                analysis.getDifficulty()
+                        );
+
+                        return AIRecommendResponse.RecommendationInfo.builder()
+                                .studentId(student.getMemberId())
+                                .studentName(student.getMember().getRealName())
+                                .recommendedCoral(personalizedReward.getCoral())
+                                .recommendedResearchData(personalizedReward.getExplorationData())
+                                .reason(analysis.getAnalysisReason())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+
+            // Step 5: 응답 반환
+            AIRecommendResponse response = AIRecommendResponse.builder()
+                    .rewardCoralDefault(baseReward.getCoral())
+                    .rewardResearchDataDefault(baseReward.getExplorationData())
+                    .recommendations(recommendations)
+                    .build();
+
+            log.info("AI reward recommendation completed for {} students", recommendations.size());
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("AI reward recommendation failed", e);
+            throw new RuntimeException("AI 보상 추천 중 오류가 발생했습니다: " + e.getMessage(), e);
         }
+    }
 
-        return AIRecommendResponse.builder()
-                .rewardCoralDefault(50)
-                .rewardResearchDataDefault(70)
-                .recommendations(recommendations)
-                .build();
+    /**
+     * Integer difficulty를 QuestDifficulty Enum으로 변환
+     */
+    private QuestDifficulty mapIntToDifficulty(Integer difficulty) {
+        if (difficulty == null) {
+            return QuestDifficulty.MEDIUM;
+        }
+        return switch (difficulty) {
+            case 1 -> QuestDifficulty.EASY;
+            case 2 -> QuestDifficulty.BASIC;
+            case 3 -> QuestDifficulty.MEDIUM;
+            case 4 -> QuestDifficulty.HARD;
+            case 5 -> QuestDifficulty.VERY_HARD;
+            default -> QuestDifficulty.MEDIUM;
+        };
     }
 
     /**

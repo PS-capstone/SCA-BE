@@ -27,6 +27,8 @@ import com.example.sca_be.domain.raid.entity.Raid;
 import com.example.sca_be.domain.raid.entity.RaidStatus;
 import com.example.sca_be.domain.raid.repository.ContributionRepository;
 import com.example.sca_be.domain.raid.repository.RaidRepository;
+import com.example.sca_be.domain.ai.entity.StudentsFactors;
+import com.example.sca_be.domain.ai.repository.StudentsFactorsRepository;
 import com.example.sca_be.global.exception.CustomException;
 import com.example.sca_be.global.exception.ErrorCode;
 import com.example.sca_be.global.security.principal.CustomUserDetails;
@@ -56,6 +58,7 @@ public class ClassesService {
     private final ActionLogRepository actionLogRepository;
     private final GroupQuestRepository groupQuestRepository;
     private final GroupQuestProgressRepository groupQuestProgressRepository;
+    private final StudentsFactorsRepository studentsFactorsRepository;
     private final Random random = new Random();
 
     //현재 로그인한 선생님의 반 목록 조회
@@ -140,12 +143,25 @@ public class ClassesService {
 
                     int pendingQuests = random.nextInt(4);//일단 quest 구현 전이어서 랜덤으로 설정
 
+                    // StudentsFactors 조회
+                    StudentsFactors studentFactor = studentsFactorsRepository.findByStudent(s).orElse(null);
+
+                    // initialized 값 설정 (없으면 false)
+                    boolean initialized = studentFactor != null && studentFactor.getInitialized() != null
+                            ? studentFactor.getInitialized() : false;
+
+                    // grade 값 설정 (initialized가 false면 0, true면 initialScore)
+                    int grade = initialized && studentFactor.getInitialScore() != null
+                            ? studentFactor.getInitialScore() : 0;
+
                     return StudentListResponse.StudentInfo.builder()
                             .studentId(s.getMemberId())
                             .name(s.getMember().getRealName())
                             .pendingQuests(pendingQuests)
                             .coral(s.getCoral() != null ? s.getCoral() : 0)
                             .researchData(s.getResearchData() != null ? s.getResearchData() : 0)
+                            .initialized(initialized)
+                            .grade(grade)
                             .build();
                 })
                 .collect(Collectors.toList());

@@ -30,10 +30,14 @@ public class StudentListResponse {
         @JsonProperty("name")
         private String name;
         @JsonProperty("pending_quests")
-        private Integer pendingQuests;  // 임시 하드코딩될 필드
+        private Integer pendingQuests;  
         @JsonProperty("coral")
         private Integer coral;
         @JsonProperty("research_data")
         private Integer researchData;
+        @JsonProperty("initialized")
+        private Boolean initialized;
+        @JsonProperty("grade")
+        private Integer grade;
     }
 }

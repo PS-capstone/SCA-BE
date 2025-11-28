@@ -27,10 +27,20 @@ spring:
       schema-locations: classpath:schema-h2.sql
       data-locations: classpath:data.sql
 
+  # AI 설정 (로컬 개발용 - 실제 키 입력 필요)
+  ai:
+    openai:
+      api-key:  # 실제 키로 먼저 채우셔야 해요
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.3
+
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+    com.example.sca_be.domain.ai: debug  # AI 서비스 로깅
 
 jwt:
   secret: your-secret-key-must-be-at-least-256-bits-long-for-HS256-algorithm-security

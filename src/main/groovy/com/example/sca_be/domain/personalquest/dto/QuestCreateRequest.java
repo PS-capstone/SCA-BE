@@ -47,7 +47,7 @@ public class QuestCreateRequest {
         @JsonProperty("reward_research_data_personal")
         private Integer rewardResearchDataPersonal;
 
-        // AI 관련 필드는 받기만 하고 무시
+        // AI 관련 필드
         @JsonProperty("ai_reward_coral")
         private Integer aiRewardCoral;
 
