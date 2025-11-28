@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -272,8 +273,8 @@ public class RaidService {
             throw new CustomException(ErrorCode.INVALID_INPUT, "시작 일시는 종료 일시보다 빨라야 합니다.");
         }
 
-        if (request.getStartDate().isBefore(LocalDateTime.now())) {
-            throw new CustomException(ErrorCode.INVALID_INPUT, "시작 일시는 현재 시간보다 빨라야 합니다.");
+        if (request.getStartDate().toLocalDate().isBefore(LocalDate.now())) {
+            throw new CustomException(ErrorCode.INVALID_INPUT, "시작 날짜는 오늘 또는 그 이후여야 합니다.");
         }
 
         // 레이드 생성
