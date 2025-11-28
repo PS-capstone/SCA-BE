@@ -8,6 +8,7 @@ import com.example.sca_be.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,7 +33,8 @@ public class StudentFactorController {
      *
      * POST /api/v1/classes/{classId}/students/initialize-factors
      */
-    @PostMapping("/initialize-factors")
+    @PutMapping("")
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<ApiResponse<InitializeFactorResponse>> initializeFactors(
             // [수정 2] ("classId")를 명시하여 컴파일러 파라미터 이름 오류 해결
             @PathVariable("classId") Integer classId,

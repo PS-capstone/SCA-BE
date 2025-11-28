@@ -30,7 +30,7 @@ spring:
   # AI 설정 (로컬 개발용 - 실제 키 입력 필요)
   ai:
     openai:
-      api-key: key_temp # 실제 키로 먼저 채우셔야 해요
+      api-key:  # 실제 키로 먼저 채우셔야 해요
       chat:
         options:
           model: gpt-4o-mini
