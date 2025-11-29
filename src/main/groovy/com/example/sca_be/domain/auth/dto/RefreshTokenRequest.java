@@ -1,5 +1,6 @@
 package com.example.sca_be.domain.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RefreshTokenRequest {
 
+    @JsonProperty("refresh_token")
     @NotBlank(message = "Refresh Token은 필수입니다.")
     private String refreshToken;
 }

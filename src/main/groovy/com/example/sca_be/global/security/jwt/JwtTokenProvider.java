@@ -79,11 +79,22 @@ public class JwtTokenProvider {
         }
     }
 
-    // "Bearer " 이후의 토큰 반환
+    // "Bearer " 이후의 토큰 반환 또는 WebSocket 요청 시 쿼리 파라미터에서 토큰 반환
     public String resolveToken(HttpServletRequest request) {
+        // Authorization 헤더에서 토큰 추출 시도
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
+        }
+
+        // WebSocket 핸드셰이크 요청의 경우, 토큰이 쿼리 파라미터에 있을 수 있습니다.
+        // 이는 브라우저 기반 WebSocket 클라이언트에서 흔히 사용되는 패턴입니다.
+        if (request.getRequestURI().startsWith("/ws")) {
+            String tokenParam = request.getParameter("token");
+            if (tokenParam != null && !tokenParam.isEmpty()) {
+                log.debug("WebSocket request received with token in query parameter.");
+                return tokenParam;
+            }
         }
         return null;
     }

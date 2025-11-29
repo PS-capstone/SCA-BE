@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,6 +34,7 @@ public class StudentDashboardService {
     private final ContributionRepository contributionRepository;
     private final GroupQuestRepository groupQuestRepository;
     private final GroupQuestProgressRepository groupQuestProgressRepository;
+    private final NotificationService notificationService;
 
     public StudentDashboardResponse getStudentDashboard(Integer studentId) {
         // 1. 학생 정보 조회
@@ -44,8 +44,8 @@ public class StudentDashboardService {
         // 2. 학생 정보 구성
         StudentDashboardResponse.StudentInfo studentInfo = buildStudentInfo(student);
 
-        // 3. 알림 정보 (하드코딩)
-        StudentDashboardResponse.Notifications notifications = buildNotifications();
+        // 3. 알림 정보 (실제 DB 조회)
+        StudentDashboardResponse.Notifications notifications = buildNotifications(studentId);
 
         // 4. 활성 레이드 정보
         StudentDashboardResponse.ActiveRaid activeRaid = null;
@@ -59,8 +59,8 @@ public class StudentDashboardService {
             groupQuests = buildGroupQuests(student);
         }
 
-        // 6. 최근 활동 정보 (하드코딩)
-        List<StudentDashboardResponse.RecentActivity> recentActivities = buildRecentActivities();
+        // 6. 최근 활동 정보 (실제 DB 조회)
+        List<StudentDashboardResponse.RecentActivity> recentActivities = buildRecentActivities(studentId);
 
         return StudentDashboardResponse.builder()
                 .studentInfo(studentInfo)
@@ -86,29 +86,39 @@ public class StudentDashboardService {
                 .build();
     }
 
-    private StudentDashboardResponse.Notifications buildNotifications() {
-        // 하드코딩된 알림 데이터
-        List<StudentDashboardResponse.Announcement> announcements = Arrays.asList(
-                StudentDashboardResponse.Announcement.builder()
-                        .id(1)
-                        .type("PERSONAL_QUEST_ASSIGNED")
-                        .title("새로운 퀘스트가 추가되었습니다")
-                        .content("RPM 100 문제 풀기")
-                        .createdAt("2025-10-30T14:00:00Z")
-                        .timeAgo("2시간 전")
-                        .build()
-        );
+    private StudentDashboardResponse.Notifications buildNotifications(Integer studentId) {
+        // 실제 DB에서 Notice 조회 (최신 10개)
+        List<com.example.sca_be.domain.notification.dto.NotificationMessage> allNotifications =
+                notificationService.getRecentNotifications(studentId, 10);
 
-        List<StudentDashboardResponse.Event> events = Arrays.asList(
-                StudentDashboardResponse.Event.builder()
-                        .id(2)
-                        .type("RAID_STARTED")
-                        .title("레이드 이벤트 참여하세요!")
-                        .content("중간고사 대비 크라켄")
-                        .createdAt("2025-10-29T10:00:00Z")
-                        .timeAgo("1일 전")
-                        .build()
-        );
+        // 타입별로 분리
+        // Announcements: 개인 퀘스트 관련
+        List<StudentDashboardResponse.Announcement> announcements = allNotifications.stream()
+                .filter(n -> n.getType().startsWith("PERSONAL_QUEST"))
+                .limit(5)
+                .map(n -> StudentDashboardResponse.Announcement.builder()
+                        .id(n.getId().intValue())
+                        .type(n.getType())
+                        .title(n.getTitle())
+                        .content(n.getContent())
+                        .createdAt(n.getCreatedAt().toString())
+                        .timeAgo(n.getTimeAgo())
+                        .build())
+                .collect(Collectors.toList());
+
+        // Events: 레이드, 단체 퀘스트
+        List<StudentDashboardResponse.Event> events = allNotifications.stream()
+                .filter(n -> n.getType().startsWith("RAID") || n.getType().startsWith("COMMUNITY_QUEST"))
+                .limit(5)
+                .map(n -> StudentDashboardResponse.Event.builder()
+                        .id(n.getId().intValue())
+                        .type(n.getType())
+                        .title(n.getTitle())
+                        .content(n.getContent())
+                        .createdAt(n.getCreatedAt().toString())
+                        .timeAgo(n.getTimeAgo())
+                        .build())
+                .collect(Collectors.toList());
 
         return StudentDashboardResponse.Notifications.builder()
                 .announcements(announcements)
@@ -200,30 +210,37 @@ public class StudentDashboardService {
         }).collect(Collectors.toList());
     }
 
-    private List<StudentDashboardResponse.RecentActivity> buildRecentActivities() {
-        // 하드코딩된 최근 활동 데이터
-        return Arrays.asList(
-                StudentDashboardResponse.RecentActivity.builder()
-                        .logId(1001)
-                        .type("QUEST_COMPLETE")
-                        .icon("C")
-                        .title("퀘스트 완료")
-                        .description("수학 문제집 풀기 완료")
-                        .reward("+15 코랄")
-                        .createdAt("2025-10-30T14:00:00Z")
-                        .timeAgo("2시간 전")
-                        .build(),
-                StudentDashboardResponse.RecentActivity.builder()
-                        .logId(1003)
-                        .type("QUEST_COMPLETE")
-                        .icon("C")
-                        .title("퀘스트 완료")
-                        .description("영어 단어 암기 완료")
-                        .reward("+10 코랄")
-                        .createdAt("2025-10-29T16:00:00Z")
-                        .timeAgo("1일 전")
-                        .build()
-        );
+    private List<StudentDashboardResponse.RecentActivity> buildRecentActivities(Integer studentId) {
+        // 실제 DB에서 ActionLog 조회 (최신 10개)
+        List<com.example.sca_be.domain.notification.dto.ActivityLogMessage> activityLogs =
+                notificationService.getRecentActivityLogs(studentId, 10);
+
+        return activityLogs.stream()
+                .map(log -> {
+                    // 보상 텍스트 생성
+                    StringBuilder reward = new StringBuilder();
+                    if (log.getRewardCoral() != null && log.getRewardCoral() > 0) {
+                        reward.append("+").append(log.getRewardCoral()).append(" 코랄");
+                    }
+                    if (log.getRewardResearchData() != null && log.getRewardResearchData() > 0) {
+                        if (reward.length() > 0) {
+                            reward.append(", ");
+                        }
+                        reward.append("+").append(log.getRewardResearchData()).append(" 탐사데이터");
+                    }
+
+                    return StudentDashboardResponse.RecentActivity.builder()
+                            .logId(log.getLogId().intValue())
+                            .type(log.getType())
+                            .icon(log.getIcon())
+                            .title(log.getTitle())
+                            .description(log.getDescription())
+                            .reward(reward.toString())
+                            .createdAt(log.getCreatedAt().toString())
+                            .timeAgo(log.getTimeAgo())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     private String calculateRemainingTime(LocalDateTime endDate) {

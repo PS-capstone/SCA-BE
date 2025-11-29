@@ -42,6 +42,7 @@ public class RaidService {
     private final StudentRepository studentRepository;
     private final ClassesRepository classesRepository;
     private final TeacherRepository teacherRepository;
+    private final com.example.sca_be.domain.notification.service.NotificationService notificationService;
 
     /**
      * 학생의 레이드 정보 조회
@@ -295,6 +296,23 @@ public class RaidService {
 
         Raid savedRaid = raidRepository.save(raid);
 
+        // 학급 전체 학생에게 레이드 시작 공지
+        List<Student> allStudents = studentRepository.findAll().stream()
+                .filter(s -> s.getClasses() != null && s.getClasses().getClassId().equals(classes.getClassId()))
+                .collect(Collectors.toList());
+
+        for (Student student : allStudents) {
+            notificationService.createAndBroadcastNotification(
+                    student,
+                    com.example.sca_be.domain.notification.entity.NoticeType.RAID_STARTED,
+                    "레이드가 시작되었습니다",
+                    savedRaid.getRaidName(),
+                    null,
+                    null,
+                    savedRaid
+            );
+        }
+
         // 남은 시간 계산
         Long remainingSeconds = 0L;
         if (savedRaid.getEndDate() != null) {
@@ -430,6 +448,23 @@ public class RaidService {
         raid.terminate();
         raidRepository.save(raid);
 
+        // 학급 전체 학생에게 레이드 종료 공지
+        List<Student> allStudents = studentRepository.findAll().stream()
+                .filter(s -> s.getClasses() != null && s.getClasses().getClassId().equals(raid.getClasses().getClassId()))
+                .collect(Collectors.toList());
+
+        for (Student student : allStudents) {
+            notificationService.createAndBroadcastNotification(
+                    student,
+                    com.example.sca_be.domain.notification.entity.NoticeType.RAID_FINISHED,
+                    "레이드가 종료되었습니다",
+                    raid.getRaidName(),
+                    null,
+                    null,
+                    raid
+            );
+        }
+
         return RaidTerminateResponse.builder()
                 .raidId(raid.getRaidId())
                 .status(raid.getStatus().name())
@@ -478,6 +513,35 @@ public class RaidService {
             raid.markCompleted();
             // 보상 지급 (코랄만 지급)
             student.addCoral(raid.getRewardCoral());
+
+            // 학급 전체 학생에게 레이드 완료 공지
+            List<Student> allStudents = studentRepository.findAll().stream()
+                    .filter(s -> s.getClasses() != null && s.getClasses().getClassId().equals(raid.getClasses().getClassId()))
+                    .collect(Collectors.toList());
+
+            for (Student studentInClass : allStudents) {
+                notificationService.createAndBroadcastNotification(
+                        studentInClass,
+                        com.example.sca_be.domain.notification.entity.NoticeType.RAID_FINISHED,
+                        "레이드가 완료되었습니다",
+                        raid.getRaidName(),
+                        null,
+                        null,
+                        raid
+                );
+            }
+
+            // 공격한 학생에게 보상 수령 활동로그
+            notificationService.createAndBroadcastActivityLog(
+                    student,
+                    com.example.sca_be.domain.notification.entity.ActionLogType.RAID_REWARD_RECEIVED,
+                    raid.getRaidName() + " 보상 수령",
+                    raid.getRewardCoral(),
+                    0,
+                    null,
+                    null,
+                    raid
+            );
         }
 
         // 기여도 업데이트 또는 생성 (Contribution 테이블에 저장)

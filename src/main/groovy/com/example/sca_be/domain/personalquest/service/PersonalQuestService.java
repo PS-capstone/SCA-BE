@@ -48,6 +48,7 @@ public class PersonalQuestService {
     private final QuestAnalyzerService questAnalyzerService;
     private final StudentFactorService studentFactorService;
     private final LearningEngineService learningEngineService;
+    private final com.example.sca_be.domain.notification.service.NotificationService notificationService;
 
     /**
      * 퀘스트 생성 및 할당
@@ -111,12 +112,23 @@ public class PersonalQuestService {
                 QuestAssignment savedAssignment = questAssignmentRepository.save(assignment);
                 questAssignmentRepository.flush(); // 즉시 DB에 반영
                 
-                System.out.println("✅ 퀘스트 할당 저장 완료 - Assignment ID: " + savedAssignment.getAssignmentId() + 
-                                 ", Quest ID: " + savedQuest.getQuestId() + 
+                System.out.println("✅ 퀘스트 할당 저장 완료 - Assignment ID: " + savedAssignment.getAssignmentId() +
+                                 ", Quest ID: " + savedQuest.getQuestId() +
                                  ", Student ID: " + savedAssignment.getStudent().getMemberId() +
                                  ", Status: " + savedAssignment.getStatus());
-                
+
                 assignments.add(savedAssignment);
+
+                // 공지 생성 및 웹소켓 전송
+                notificationService.createAndBroadcastNotification(
+                        student,
+                        com.example.sca_be.domain.notification.entity.NoticeType.PERSONAL_QUEST_ASSIGNED,
+                        "새로운 퀘스트가 추가되었습니다",
+                        savedQuest.getTitle(),
+                        savedAssignment,
+                        null,
+                        null
+                );
             } catch (Exception e) {
                 System.err.println("❌ 퀘스트 할당 저장 실패 - 학생 ID: " + assignmentReq.getStudentId());
                 System.err.println("에러: " + e.getMessage());
@@ -463,6 +475,29 @@ public class PersonalQuestService {
             assignment.getSubmission().updateComment(request.getComment());
         }
 
+        // 승인 공지 생성 및 웹소켓 전송
+        notificationService.createAndBroadcastNotification(
+                student,
+                com.example.sca_be.domain.notification.entity.NoticeType.PERSONAL_QUEST_APPROVED,
+                "퀘스트가 승인되었습니다",
+                assignment.getQuest().getTitle(),
+                assignment,
+                null,
+                null
+        );
+
+        // 보상 수령 활동로그 생성 및 웹소켓 전송
+        notificationService.createAndBroadcastActivityLog(
+                student,
+                com.example.sca_be.domain.notification.entity.ActionLogType.REWARD_RECEIVED,
+                assignment.getQuest().getTitle() + " 완료",
+                rewardCoral,
+                rewardResearchData,
+                assignment,
+                null,
+                null
+        );
+
         return QuestApproveResponse.builder()
                 .assignmentId(assignment.getAssignmentId())
                 .questId(assignment.getQuest().getQuestId())
@@ -498,6 +533,17 @@ public class PersonalQuestService {
         if (assignment.getSubmission() != null) {
             assignment.getSubmission().updateComment(request.getComment());
         }
+
+        // 거절 공지 생성 및 웹소켓 전송
+        notificationService.createAndBroadcastNotification(
+                assignment.getStudent(),
+                com.example.sca_be.domain.notification.entity.NoticeType.PERSONAL_QUEST_REJECTED,
+                "퀘스트가 반려되었습니다",
+                assignment.getQuest().getTitle(),
+                assignment,
+                null,
+                null
+        );
 
         return QuestRejectResponse.builder()
                 .assignmentId(assignment.getAssignmentId())

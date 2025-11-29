@@ -34,6 +34,7 @@ public class GroupQuestService {
     private final ClassesRepository classesRepository;
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
+    private final com.example.sca_be.domain.notification.service.NotificationService notificationService;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -121,6 +122,17 @@ public class GroupQuestService {
                     .isCompleted(false)
                     .build();
             progressRepository.save(progress);
+
+            // 학급 전체 학생에게 단체 퀘스트 할당 공지
+            notificationService.createAndBroadcastNotification(
+                    student,
+                    com.example.sca_be.domain.notification.entity.NoticeType.COMMUNITY_QUEST_ASSIGNED,
+                    "새로운 단체 퀘스트가 부여되었습니다",
+                    savedQuest.getTitle(),
+                    null,
+                    savedQuest,
+                    null
+            );
         }
 
         Integer completedCount = progressRepository.countCompletedByGroupQuestId(savedQuest.getGroupQuestId());
@@ -333,6 +345,64 @@ public class GroupQuestService {
 
         quest.updateStatus(newStatus);
         groupQuestRepository.save(quest);
+
+        // 학급 전체 학생에게 공지 전송
+        List<Student> allStudents = studentRepository.findAll().stream()
+                .filter(s -> s.getClasses() != null && s.getClasses().getClassId().equals(quest.getClasses().getClassId()))
+                .collect(Collectors.toList());
+
+        if (newStatus == GroupQuestStatus.COMPLETED) {
+            // 성공: 전체 학생에게 완료 공지
+            for (Student student : allStudents) {
+                notificationService.createAndBroadcastNotification(
+                        student,
+                        com.example.sca_be.domain.notification.entity.NoticeType.COMMUNITY_QUEST_FINISHED,
+                        "단체 퀘스트가 완료되었습니다",
+                        quest.getTitle(),
+                        null,
+                        quest,
+                        null
+                );
+            }
+
+            // 수행한 학생들에게만 보상 지급 및 활동로그 생성
+            List<GroupQuestProgress> completedProgress = progressList.stream()
+                    .filter(GroupQuestProgress::getIsCompleted)
+                    .collect(Collectors.toList());
+
+            for (GroupQuestProgress progress : completedProgress) {
+                Student student = progress.getStudent();
+                // 보상 지급
+                student.addCoral(quest.getRewardCoral());
+                student.addResearchData(quest.getRewardResearchData());
+                studentRepository.save(student);
+
+                // 활동로그 생성 및 웹소켓 전송
+                notificationService.createAndBroadcastActivityLog(
+                        student,
+                        com.example.sca_be.domain.notification.entity.ActionLogType.GROUP_QUEST_COMPLETE,
+                        quest.getTitle() + " 완료",
+                        quest.getRewardCoral(),
+                        quest.getRewardResearchData(),
+                        null,
+                        quest,
+                        null
+                );
+            }
+        } else {
+            // 실패: 전체 학생에게 실패 공지
+            for (Student student : allStudents) {
+                notificationService.createAndBroadcastNotification(
+                        student,
+                        com.example.sca_be.domain.notification.entity.NoticeType.COMMUNITY_QUEST_REJECTED,
+                        "단체 퀘스트가 종료되었습니다",
+                        quest.getTitle() + " - 목표 미달",
+                        null,
+                        quest,
+                        null
+                );
+            }
+        }
 
         return CompleteQuestResponse.builder()
                 .questId(quest.getGroupQuestId())

@@ -42,9 +42,6 @@ public class ActionLog extends BaseTimeEntity {
     @Column(name = "change_research")
     private Integer changeResearch;
 
-    @Column(name = "reference_id")
-    private Integer referenceId;
-
     @Column(name = "log_message", length = 255)
     private String logMessage;
 
