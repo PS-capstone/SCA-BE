@@ -142,30 +142,15 @@ public class PersonalQuestController {
     }
 
     /**
-     * 9. 퀘스트 제출 수정 (학생용)
+     * 9. 학생별 퀘스트 목록 조회 (선생님용)
      */
-    @PutMapping("/{assignmentId}/submit")
-    public ResponseEntity<ApiResponse<QuestSubmitResponse>> updateSubmission(
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<ApiResponse<MyQuestListResponse>> getStudentQuests(
             Authentication authentication,
-            @PathVariable("assignmentId") Integer assignmentId,
-            @RequestBody QuestSubmitRequest request) {
+            @PathVariable("studentId") Integer studentId) {
 
-        Integer studentId = getStudentId(authentication);
-        QuestSubmitResponse response = personalQuestService.updateSubmission(studentId, assignmentId, request);
-
-        return ResponseEntity.ok(ApiResponse.success(response, "제출 내용이 수정되었습니다."));
-    }
-
-    /**
-     * 10. 퀘스트 코멘트 조회 (학생용)
-     */
-    @GetMapping("/{assignmentId}/comment")
-    public ResponseEntity<ApiResponse<QuestCommentResponse>> getQuestComment(
-            Authentication authentication,
-            @PathVariable("assignmentId") Integer assignmentId) {
-
-        Integer studentId = getStudentId(authentication);
-        QuestCommentResponse response = personalQuestService.getQuestComment(studentId, assignmentId);
+        Integer teacherId = getTeacherId(authentication);
+        MyQuestListResponse response = personalQuestService.getStudentQuests(teacherId, studentId);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

@@ -104,12 +104,16 @@ public class SecurityConfig {
                         
                         // TEACHER와 STUDENT 모두 접근 가능한 경로
                         .requestMatchers(
-                                "/api/v1/files/upload"                             // 파일 업로드 (TEACHER, STUDENT 모두)
+                                "/api/v1/files/upload",                            // 파일 업로드 (TEACHER, STUDENT 모두)
+                                "/api/v1/images/upload",                           // 이미지 업로드 (TEACHER, STUDENT 모두)
+                                "/api/v1/documents/upload"                          // PDF 문서 업로드 (TEACHER, STUDENT 모두)
                         ).hasAnyRole("TEACHER", "STUDENT")
                         
                         // 인증된 사용자만 접근 가능한 경로
                         .requestMatchers(
-                                "/api/v1/files/**"                                 // 파일 다운로드
+                                "/api/v1/files/**",                                 // 파일 다운로드
+                                "/api/v1/images/**",                                // 이미지 조회
+                                "/api/v1/documents/**"                              // 문서 조회
                         ).authenticated()
 
                         // 그 외 모든 요청은 인증 필요

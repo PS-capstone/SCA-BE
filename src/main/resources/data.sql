@@ -11,21 +11,21 @@
 -- Total: 100%
 INSERT INTO fish (fish_name, grade, probability) VALUES
 -- COMMON (7개)
+('해파리', 'COMMON', 0.10),
 ('열대어', 'COMMON', 0.10),
-('금붕어', 'COMMON', 0.10),
-('구피', 'COMMON', 0.10),
-('네온테트라', 'COMMON', 0.10),
-('흰동가리', 'COMMON', 0.10),
 ('해마', 'COMMON', 0.10),
 ('복어', 'COMMON', 0.10),
+('금붕어', 'COMMON', 0.10),
+('흰동가리', 'COMMON', 0.10),
+('구피', 'COMMON', 0.10),
 -- RARE (4개)
-('가오리', 'RARE', 0.0625),
-('상어', 'RARE', 0.0625),
-('범고래', 'RARE', 0.0625),
 ('바다거북', 'RARE', 0.0625),
--- LEGENDARY (2개) - 빈칸으로 표시
-('???', 'LEGENDARY', 0.025),
-('???', 'LEGENDARY', 0.025);
+('문어', 'RARE', 0.0625),
+('상어', 'RARE', 0.0625),
+('전기뱀장어', 'RARE', 0.0625),
+-- LEGENDARY (2개)
+('바다해룡', 'LEGENDARY', 0.025),
+('리바이어던', 'LEGENDARY', 0.025);
 
 -- 2. Members (User Base Info) - 3 Teachers, 10 Students
 -- member_id is auto-generated

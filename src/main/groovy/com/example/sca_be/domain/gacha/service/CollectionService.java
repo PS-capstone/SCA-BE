@@ -73,8 +73,8 @@ public class CollectionService {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STUDENT_NOT_FOUND));
 
-        // 2. 전체 물고기 목록 조회
-        List<Fish> allFish = fishRepository.findAll();
+        // 2. 전체 물고기 목록 조회 (fish_id 순서로 정렬하여 MySQL과 H2 순서 일치 보장)
+        List<Fish> allFish = fishRepository.findAllByOrderByFishIdAsc();
 
         // 3. 학생의 컬렉션 조회
         Collection collection = collectionRepository.findByStudent(student)

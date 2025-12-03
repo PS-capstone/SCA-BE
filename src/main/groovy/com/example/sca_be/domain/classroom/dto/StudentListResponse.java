@@ -39,5 +39,11 @@ public class StudentListResponse {
         private Boolean initialized;
         @JsonProperty("grade")
         private Integer grade;
+        @JsonProperty("quest_completion_rate")
+        private Integer questCompletionRate;
+        @JsonProperty("completed_quests_count")
+        private Integer completedQuestsCount;
+        @JsonProperty("incomplete_quests_count")
+        private Integer incompleteQuestsCount;
     }
 }

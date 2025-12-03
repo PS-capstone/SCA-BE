@@ -73,7 +73,10 @@ public class ClassesService {
                 .map(c -> {
                     int studentCount = studentRepository.countByClasses(c);
 
-                    int waitingQuestCount = 0;//이거 나중에 퀘스트 관련 로직 잡고 고쳐야 함
+                    // 해당 반의 승인 대기 중인 퀘스트 수 계산
+                    List<QuestAssignment> pendingAssignments = questAssignmentRepository.findPendingAssignmentsByTeacherAndClass(
+                            teacher.getMemberId(), QuestStatus.SUBMITTED, c.getClassId());
+                    int waitingQuestCount = pendingAssignments.size();
 
                     return ClassListResponse.ClassSummary.builder()
                             .classId(c.getClassId())
@@ -141,7 +144,10 @@ public class ClassesService {
         List<StudentListResponse.StudentInfo> studentInfos = students.stream()
                 .map(s -> {
 
-                    int pendingQuests = random.nextInt(4);//일단 quest 구현 전이어서 랜덤으로 설정
+                    // 실제 승인 대기 중인 퀘스트 수 계산 (SUBMITTED 상태)
+                    List<QuestAssignment> pendingAssignments = questAssignmentRepository.findByStudentAndStatusIn(
+                            s.getMemberId(), Arrays.asList(QuestStatus.SUBMITTED));
+                    int pendingQuests = pendingAssignments.size();
 
                     // StudentsFactors 조회
                     StudentsFactors studentFactor = studentsFactorsRepository.findByStudent(s).orElse(null);
@@ -154,14 +160,53 @@ public class ClassesService {
                     int grade = initialized && studentFactor.getInitialScore() != null
                             ? studentFactor.getInitialScore() : 0;
 
+                    // 퀘스트 달성 정보 계산 (개인 퀘스트만)
+                    List<QuestStatus> allStatuses = Arrays.asList(
+                            QuestStatus.ASSIGNED,
+                            QuestStatus.SUBMITTED,
+                            QuestStatus.APPROVED,
+                            QuestStatus.REJECTED,
+                            QuestStatus.EXPIRED
+                    );
+                    
+                    List<QuestAssignment> allQuests = questAssignmentRepository.findByStudentAndStatusIn(
+                            s.getMemberId(), allStatuses);
+                    
+                    int totalQuests = allQuests.size();
+                    long completedQuests = allQuests.stream()
+                            .filter(qa -> qa.getStatus() == QuestStatus.APPROVED)
+                            .count();
+                    int incompleteQuests = totalQuests - (int) completedQuests;
+                    
+                    int questCompletionRate = 0;
+                    if (totalQuests > 0) {
+                        questCompletionRate = (int) Math.round((completedQuests * 100.0) / totalQuests);
+                    }
+
+                    // 승인된 퀘스트의 보상 합계 계산 (전체 총합)
+                    List<QuestAssignment> approvedQuests = allQuests.stream()
+                            .filter(qa -> qa.getStatus() == QuestStatus.APPROVED)
+                            .collect(Collectors.toList());
+                    
+                    int totalEarnedCoral = approvedQuests.stream()
+                            .mapToInt(qa -> qa.getRewardCoralPersonal() != null ? qa.getRewardCoralPersonal() : 0)
+                            .sum();
+                    
+                    int totalEarnedResearchData = approvedQuests.stream()
+                            .mapToInt(qa -> qa.getRewardResearchDataPersonal() != null ? qa.getRewardResearchDataPersonal() : 0)
+                            .sum();
+
                     return StudentListResponse.StudentInfo.builder()
                             .studentId(s.getMemberId())
                             .name(s.getMember().getRealName())
                             .pendingQuests(pendingQuests)
-                            .coral(s.getCoral() != null ? s.getCoral() : 0)
-                            .researchData(s.getResearchData() != null ? s.getResearchData() : 0)
+                            .coral(totalEarnedCoral)
+                            .researchData(totalEarnedResearchData)
                             .initialized(initialized)
                             .grade(grade)
+                            .questCompletionRate(questCompletionRate)
+                            .completedQuestsCount((int) completedQuests)
+                            .incompleteQuestsCount(incompleteQuests)
                             .build();
                 })
                 .collect(Collectors.toList());

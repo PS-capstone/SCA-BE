@@ -68,4 +68,21 @@ public class Member extends BaseTimeEntity {
     public void recover() {
         this.deletedAt = null;
     }
+
+    // 프로필 업데이트 메서드
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateRealName(String realName) {
+        this.realName = realName;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
 }

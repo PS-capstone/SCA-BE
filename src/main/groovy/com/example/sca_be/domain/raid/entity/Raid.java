@@ -54,15 +54,15 @@ public class Raid extends BaseTimeEntity {
     private String specialRewardDescription;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(name = "status", columnDefinition = "ENUM('ACTIVE','COMPLETED','EXPIRED','TERMINATED')")
     private RaidStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(name = "difficulty", columnDefinition = "ENUM('LOW','MEDIUM','HIGH')")
     private Difficulty difficulty;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "boss_type", length = 30)
+    @Column(name = "boss_type", columnDefinition = "ENUM('ZELUS_INDUSTRY','KRAKEN')")
     private RaidTemplate bossType;
 
     @OneToMany(mappedBy = "raid", cascade = CascadeType.ALL, orphanRemoval = true)

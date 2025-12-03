@@ -49,10 +49,19 @@ public enum ErrorCode {
     ASSIGNMENT_NOT_SUBMITTED("제출되지 않은 퀘스트는 승인할 수 없습니다."),
     NOT_PROCESSED_YET("아직 처리되지 않은 퀘스트입니다."),
 
+    // ===== 파일/이미지 관련 (400) =====
+    INVALID_IMAGE_TYPE("지원하지 않는 이미지 형식입니다. (jpg, jpeg, png, gif, webp만 가능)"),
+    IMAGE_TOO_LARGE("이미지 크기가 너무 큽니다. 최대 10MB까지 업로드 가능합니다."),
+    INVALID_IMAGE_FILE("유효하지 않은 이미지 파일입니다."),
+    INVALID_DOCUMENT_TYPE("지원하지 않는 문서 형식입니다. (pdf만 가능)"),
+    DOCUMENT_TOO_LARGE("문서 크기가 너무 큽니다. 최대 50MB까지 업로드 가능합니다."),
+    INVALID_DOCUMENT_FILE("유효하지 않은 문서 파일입니다."),
+    
     // ===== 서버 오류 (500) =====
     INTERNAL_SERVER_ERROR("서버 오류가 발생했습니다."),
     DATABASE_ERROR("데이터베이스 오류가 발생했습니다."),
-    FILE_UPLOAD_ERROR("파일 업로드 중 오류가 발생했습니다.");
+    FILE_UPLOAD_ERROR("파일 업로드 중 오류가 발생했습니다."),
+    IMAGE_PROCESSING_ERROR("이미지 처리 중 오류가 발생했습니다.");
 
     private final String message;
 

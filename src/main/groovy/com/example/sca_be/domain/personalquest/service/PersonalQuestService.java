@@ -283,6 +283,23 @@ public class PersonalQuestService {
                     analysis.getEffortScore(),
                     analysis.getDifficulty());
 
+            // 조회된 학생 수 확인
+            if (students.isEmpty()) {
+                log.warn("No students found for IDs: {}", request.getStudentIds());
+                throw new RuntimeException("선택한 학생을 찾을 수 없습니다.");
+            }
+
+            if (students.size() < request.getStudentIds().size()) {
+                List<Integer> foundIds = students.stream()
+                        .map(Student::getMemberId)
+                        .collect(Collectors.toList());
+                List<Integer> missingIds = request.getStudentIds().stream()
+                        .filter(id -> !foundIds.contains(id))
+                        .collect(Collectors.toList());
+                log.warn("Some students not found. Requested: {}, Found: {}, Missing: {}",
+                        request.getStudentIds(), foundIds, missingIds);
+            }
+
             // Step 3: 기본 보상 계산
             BaseReward baseReward = StudentFactorService.calculateBaseReward(
                     analysis.getCognitiveProcessScore(),
@@ -294,6 +311,14 @@ public class PersonalQuestService {
 
             // Step 4: 각 학생별 개인화 보상 계산
             List<AIRecommendResponse.RecommendationInfo> recommendations = students.stream()
+                    .filter(student -> {
+                        // Member가 null이거나 삭제된 경우 필터링
+                        if (student.getMember() == null) {
+                            log.warn("Student {} has no member, skipping", student.getMemberId());
+                            return false;
+                        }
+                        return true;
+                    })
                     .map(student -> {
                         PersonalizedReward personalizedReward = studentFactorService.calculatePersonalizedReward(
                                 student.getMemberId(),
@@ -304,7 +329,7 @@ public class PersonalQuestService {
 
                         return AIRecommendResponse.RecommendationInfo.builder()
                                 .studentId(student.getMemberId())
-                                .studentName(student.getMember().getRealName())
+                                .studentName(student.getMember() != null ? student.getMember().getRealName() : "알 수 없음")
                                 .recommendedCoral(personalizedReward.getCoral())
                                 .recommendedResearchData(personalizedReward.getExplorationData())
                                 .reason(analysis.getAnalysisReason())
@@ -398,6 +423,8 @@ public class PersonalQuestService {
         QuestDetailResponse.SubmissionInfo submissionInfo = null;
         if (assignment.getSubmission() != null) {
             Submission submission = assignment.getSubmission();
+            log.info("[퀘스트 상세] Submission 조회 - submissionId: {}, attachmentUrl: {}", 
+                    submission.getSubmissionId(), submission.getAttachmentUrl());
             submissionInfo = QuestDetailResponse.SubmissionInfo.builder()
                     .submissionId(submission.getSubmissionId())
                     .studentContent(submission.getStudentContent())
@@ -405,6 +432,9 @@ public class PersonalQuestService {
                     .submittedAt(submission.getSubmittedAt())
                     .comment(submission.getComment())
                     .build();
+            log.info("[퀘스트 상세] SubmissionInfo 생성 완료 - attachmentUrl: {}", submissionInfo.getAttachmentUrl());
+        } else {
+            log.warn("[퀘스트 상세] Submission이 null입니다. assignmentId: {}", assignmentId);
         }
 
         return QuestDetailResponse.builder()
@@ -658,6 +688,32 @@ public class PersonalQuestService {
     }
 
     /**
+     * 선생님이 특정 학생의 퀘스트 목록 조회
+     */
+    public MyQuestListResponse getStudentQuests(Integer teacherId, Integer studentId) {
+        // 권한 체크: 해당 학생이 선생님의 반에 속해있는지 확인
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STUDENT_NOT_FOUND));
+
+        if (student.getClasses() == null || 
+            !student.getClasses().getTeacher().getMemberId().equals(teacherId)) {
+            throw new CustomException(ErrorCode.CLASS_ACCESS_DENIED);
+        }
+
+        // 진행 중인 퀘스트 (ASSIGNED 상태)
+        List<QuestStatus> activeStatuses = Arrays.asList(QuestStatus.ASSIGNED);
+        List<QuestAssignment> activeQuests = questAssignmentRepository.findByStudentAndStatusIn(
+                studentId, activeStatuses);
+
+        return MyQuestListResponse.builder()
+                .activeQuests(convertToQuestItems(activeQuests))
+                .expiredQuests(new ArrayList<>())
+                .approvedQuests(new ArrayList<>())
+                .totalCount(activeQuests.size())
+                .build();
+    }
+
+    /**
      * 퀘스트 제출
      */
     @Transactional
@@ -682,6 +738,8 @@ public class PersonalQuestService {
         }
 
         // Submission 생성
+        log.info("[퀘스트 제출] 요청 데이터 - content: {}, attachmentUrl: {}", 
+                request.getContent(), request.getAttachmentUrl());
         Submission submission = Submission.builder()
                 .questAssignment(assignment)
                 .studentContent(request.getContent())
@@ -689,6 +747,8 @@ public class PersonalQuestService {
                 .build();
 
         Submission savedSubmission = submissionRepository.save(submission);
+        log.info("[퀘스트 제출] 저장 완료 - submissionId: {}, attachmentUrl: {}", 
+                savedSubmission.getSubmissionId(), savedSubmission.getAttachmentUrl());
 
         // 상태 업데이트
         assignment.updateStatus(QuestStatus.SUBMITTED);

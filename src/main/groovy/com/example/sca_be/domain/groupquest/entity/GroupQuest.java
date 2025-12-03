@@ -47,8 +47,7 @@ public class GroupQuest extends BaseTimeEntity {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
-    @Lob
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
 

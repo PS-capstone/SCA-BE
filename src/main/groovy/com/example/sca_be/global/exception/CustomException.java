@@ -66,6 +66,7 @@ public class CustomException extends RuntimeException {
             case INTERNAL_SERVER_ERROR:
             case DATABASE_ERROR:
             case FILE_UPLOAD_ERROR:
+            case IMAGE_PROCESSING_ERROR:
                 return HttpStatus.INTERNAL_SERVER_ERROR;
 
             // 나머지는 400 Bad Request

@@ -114,30 +114,6 @@ public class GroupQuestController {
         }
     }
 
-    @DeleteMapping("/{questId}/students/{studentId}/check")
-    @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<ApiResponse<CheckStudentResponse>> uncheckStudent(
-            Authentication authentication,
-            @PathVariable("questId") Integer questId,
-            @PathVariable("studentId") Integer studentId) {
-
-        try {
-            CheckStudentResponse response = groupQuestService.uncheckStudent(questId, studentId);
-
-            String message = response.getQuestStatus().getIsAchievable() ?
-                    "학생 달성이 취소되어, 조건 충족이 취소되었습니다." :
-                    "학생 달성 체크가 취소되었습니다.";
-
-            return ResponseEntity.ok(ApiResponse.success(message, response));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error("STUDENT_NOT_FOUND", e.getMessage()));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error("GROUP_QUEST_ALREADY_COMPLETED", e.getMessage()));
-        }
-    }
-
     @PostMapping("/{questId}/complete")
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<ApiResponse<CompleteQuestResponse>> completeQuest(

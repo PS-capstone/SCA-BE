@@ -289,10 +289,98 @@ public class AuthService {
                 .build();
     }
 
-    // 5. 로그아웃 (현재는 클라이언트에서 토큰 삭제만 하면 됨)
+    // 6. 선생님 프로필 조회
+    public TeacherProfileResponse getTeacherProfile(Integer memberId) {
+        Teacher teacher = teacherRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TEACHER_NOT_FOUND));
+
+        Member member = teacher.getMember();
+
+        return TeacherProfileResponse.builder()
+                .teacherId(teacher.getMemberId())
+                .username(member.getUsername())
+                .realName(member.getRealName())
+                .nickname(member.getNickname())
+                .email(member.getEmail())
+                .role("ROLE_" + member.getRole().name())
+                .createdAt(member.getCreatedAt() != null ? member.getCreatedAt().toString() : null)
+                .build();
+    }
+
+    // 7. 비밀번호 변경
     @Transactional
-    public void logout(LogoutRequest request) {
-        // 추후 Refresh Token을 Redis나 DB에 저장하는 경우 여기서 삭제
-        // 현재는 클라이언트 측에서 토큰 삭제만 하면 되므로 별도 로직 없음
+    public void changePassword(Integer memberId, PasswordChangeRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS, "현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호로 변경
+        member.updatePassword(passwordEncoder.encode(request.getNewPassword()));
+        memberRepository.save(member);
+    }
+
+    // 8. 선생님 프로필 수정
+    @Transactional
+    public TeacherProfileResponse updateTeacherProfile(Integer memberId, ProfileUpdateRequest request) {
+        Teacher teacher = teacherRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TEACHER_NOT_FOUND));
+
+        Member member = teacher.getMember();
+
+        // 이메일 중복 확인 (다른 사용자가 사용 중인지)
+        if (request.getEmail() != null && !request.getEmail().isEmpty() && !request.getEmail().equals(member.getEmail())) {
+            if (memberRepository.existsByEmail(request.getEmail())) {
+                throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+            }
+        }
+
+        // 닉네임 중복 확인
+        if (request.getNickname() != null && !request.getNickname().isEmpty() && !request.getNickname().equals(member.getNickname())) {
+            if (memberRepository.existsByNickname(request.getNickname())) {
+                throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
+            }
+        }
+
+        // 프로필 업데이트
+        if (request.getRealName() != null) {
+            member.updateRealName(request.getRealName());
+        }
+        if (request.getNickname() != null) {
+            member.updateNickname(request.getNickname());
+        }
+        if (request.getEmail() != null) {
+            member.updateEmail(request.getEmail());
+        }
+
+        memberRepository.save(member);
+
+        return TeacherProfileResponse.builder()
+                .teacherId(teacher.getMemberId())
+                .username(member.getUsername())
+                .realName(member.getRealName())
+                .nickname(member.getNickname())
+                .email(member.getEmail())
+                .role("ROLE_" + member.getRole().name())
+                .createdAt(member.getCreatedAt() != null ? member.getCreatedAt().toString() : null)
+                .build();
+    }
+
+    // 9. 회원 탈퇴
+    @Transactional
+    public void deleteAccount(Integer memberId, AccountDeleteRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 비밀번호 확인
+        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS, "비밀번호가 일치하지 않습니다.");
+        }
+
+        // Soft Delete (deleted_at 설정)
+        memberRepository.delete(member);
     }
 }

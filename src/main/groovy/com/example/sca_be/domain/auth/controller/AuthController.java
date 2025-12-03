@@ -68,30 +68,66 @@ public class AuthController {
                 .body(ApiResponse.success("토큰이 갱신되었습니다.", response));
     }
 
-    // 5. 로그아웃
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(
-            @Valid @RequestBody LogoutRequest request) {
-
-        authService.logout(request);
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success("로그아웃되었습니다."));
-    }
-
-    // 6. 학생 프로필 조회
-    @GetMapping("/student/me")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<ApiResponse<StudentProfileResponse>> getStudentProfile(
+    // 5. 선생님 프로필 조회
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<ApiResponse<TeacherProfileResponse>> getTeacherProfile(
             Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        Integer studentId = userDetails.getMemberId();
+        Integer memberId = userDetails.getMemberId(); // 로그인 사용자 = Member ID
         
-        StudentProfileResponse response = authService.getStudentProfile(studentId);
+        TeacherProfileResponse response = authService.getTeacherProfile(memberId);
         
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(response));
+    }
+
+    // 6. 선생님 프로필 수정
+    @PatchMapping("/me")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<ApiResponse<TeacherProfileResponse>> updateTeacherProfile(
+            Authentication authentication,
+            @Valid @RequestBody ProfileUpdateRequest request) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Integer memberId = userDetails.getMemberId();
+        
+        TeacherProfileResponse response = authService.updateTeacherProfile(memberId, request);
+        
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("프로필이 수정되었습니다.", response));
+    }
+
+    // 7. 비밀번호 변경
+    @PostMapping("/password/change")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody PasswordChangeRequest request) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Integer memberId = userDetails.getMemberId();
+        
+        authService.changePassword(memberId, request);
+        
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("비밀번호가 변경되었습니다."));
+    }
+
+    // 8. 회원 탈퇴
+    @DeleteMapping("/me")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<ApiResponse<Void>> deleteAccount(
+            Authentication authentication,
+            @Valid @RequestBody AccountDeleteRequest request) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Integer memberId = userDetails.getMemberId();
+        
+        authService.deleteAccount(memberId, request);
+        
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("회원 탈퇴가 완료되었습니다."));
     }
 }
