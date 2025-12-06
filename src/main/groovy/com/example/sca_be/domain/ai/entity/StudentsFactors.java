@@ -1,5 +1,6 @@
 package com.example.sca_be.domain.ai.entity;
 
+import com.example.sca_be.domain.ai.config.AIConstants;
 import com.example.sca_be.domain.auth.entity.Student;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -92,8 +93,10 @@ public class StudentsFactors {
 
     // 계수 업데이트 메서드
     public void updateGlobalFactor(Double newFactor) {
-        if (newFactor < 0.5 || newFactor > 1.5) {
-            throw new IllegalArgumentException("Global factor must be between 0.5 and 1.5");
+        if (newFactor < AIConstants.FACTOR_MIN || newFactor > AIConstants.FACTOR_MAX) {
+            throw new IllegalArgumentException(
+                    String.format("Global factor must be between %.1f and %.1f",
+                            AIConstants.FACTOR_MIN, AIConstants.FACTOR_MAX));
         }
         this.globalFactor = newFactor;
     }

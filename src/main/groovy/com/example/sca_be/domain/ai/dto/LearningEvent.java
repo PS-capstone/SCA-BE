@@ -59,4 +59,14 @@ public class LearningEvent {
      * 선생님이 최종 확정한 탐사 데이터
      */
     private Integer teacherResearchData;
+
+    /**
+     * 학생 전역 계수
+     */
+    private Double globalFactor;
+
+    /**
+     * 해당 난이도에 대한 학생 계수
+     */
+    private Double difficultyFactor;
 }

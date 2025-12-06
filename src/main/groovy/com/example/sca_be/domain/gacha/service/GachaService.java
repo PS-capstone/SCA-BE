@@ -33,7 +33,7 @@ public class GachaService {
     private final CollectionRepository collectionRepository;
     private final CollectionEntryRepository collectionEntryRepository;
 
-    private static final int GACHA_COST = 10;
+    private static final int GACHA_COST = 35;
     private final Random random = new Random();
 
     /**

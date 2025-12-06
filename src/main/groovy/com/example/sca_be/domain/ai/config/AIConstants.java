@@ -28,10 +28,10 @@ public class AIConstants {
     public static final double LEARNING_RATE_MINOR = 0.05;      // 5% 이하 수정
 
     // ========== 보정계수 범위 ==========
-    public static final double FACTOR_MIN = 0.5;
-    public static final double FACTOR_MAX = 1.5;
-    public static final double INITIAL_FACTOR_MIN = 0.75;
-    public static final double INITIAL_FACTOR_MAX = 1.25;
+    public static final double FACTOR_MIN = 0.8;
+    public static final double FACTOR_MAX = 1.2;
+    public static final double INITIAL_FACTOR_MIN = 0.9;
+    public static final double INITIAL_FACTOR_MAX = 1.1;
 
     // ========== 수정 유형 분류 임계값 ==========
     public static final double OVERRIDE_THRESHOLD = 0.2;      // 20%

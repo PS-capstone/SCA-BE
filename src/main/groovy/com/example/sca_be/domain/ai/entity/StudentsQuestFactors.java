@@ -1,5 +1,6 @@
 package com.example.sca_be.domain.ai.entity;
 
+import com.example.sca_be.domain.ai.config.AIConstants;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -74,8 +75,10 @@ public class StudentsQuestFactors {
 
     // 계수 업데이트 메서드
     public void updateFactorValue(Double newFactorValue) {
-        if (newFactorValue < 0.5 || newFactorValue > 1.5) {
-            throw new IllegalArgumentException("Factor value must be between 0.5 and 1.5");
+        if (newFactorValue < AIConstants.FACTOR_MIN || newFactorValue > AIConstants.FACTOR_MAX) {
+            throw new IllegalArgumentException(
+                    String.format("Factor value must be between %.1f and %.1f",
+                            AIConstants.FACTOR_MIN, AIConstants.FACTOR_MAX));
         }
         this.factorValue = newFactorValue;
     }

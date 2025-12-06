@@ -5,6 +5,10 @@ import com.example.sca_be.domain.ai.dto.LearningEvent;
 import com.example.sca_be.domain.ai.dto.PersonalizedReward;
 import com.example.sca_be.domain.ai.dto.QuestAnalysisResult;
 import com.example.sca_be.domain.ai.entity.QuestDifficulty;
+import com.example.sca_be.domain.ai.entity.StudentsFactors;
+import com.example.sca_be.domain.ai.entity.StudentsQuestFactors;
+import com.example.sca_be.domain.ai.repository.StudentsFactorsRepository;
+import com.example.sca_be.domain.ai.repository.StudentsQuestFactorsRepository;
 import com.example.sca_be.domain.ai.service.LearningEngineService;
 import com.example.sca_be.domain.ai.service.QuestAnalyzerService;
 import com.example.sca_be.domain.ai.service.StudentFactorService;
@@ -49,6 +53,8 @@ public class PersonalQuestService {
     private final StudentFactorService studentFactorService;
     private final LearningEngineService learningEngineService;
     private final com.example.sca_be.domain.notification.service.NotificationService notificationService;
+    private final StudentsFactorsRepository studentsFactorsRepository;
+    private final StudentsQuestFactorsRepository studentsQuestFactorsRepository;
 
     /**
      * 퀘스트 생성 및 할당
@@ -205,6 +211,26 @@ public class PersonalQuestService {
                         assignmentReq.getAiRewardResearchData()
                 );
 
+                // 학생의 전역 계수 조회
+                Double globalFactor = 1.0; // 기본값
+                Double difficultyFactor = 1.0; // 기본값
+
+                StudentsFactors studentFactors = studentsFactorsRepository.findByStudent(savedAssignment.getStudent())
+                        .orElse(null);
+
+                if (studentFactors != null) {
+                    globalFactor = studentFactors.getGlobalFactor();
+
+                    // 해당 난이도의 계수 조회
+                    StudentsQuestFactors questFactors = studentsQuestFactorsRepository
+                            .findByStudentFactorAndDifficulty(studentFactors, request.getDifficulty())
+                            .orElse(null);
+
+                    if (questFactors != null) {
+                        difficultyFactor = questFactors.getFactorValue();
+                    }
+                }
+
                 // 학습 이벤트 생성 및 비동기 실행
                 LearningEvent event = LearningEvent.builder()
                         .studentId(savedAssignment.getStudent().getMemberId())
@@ -216,6 +242,8 @@ public class PersonalQuestService {
                         .aiResearchData(assignmentReq.getAiRewardResearchData())
                         .teacherCoral(assignmentReq.getRewardCoralPersonal())
                         .teacherResearchData(assignmentReq.getRewardResearchDataPersonal())
+                        .globalFactor(globalFactor)
+                        .difficultyFactor(difficultyFactor)
                         .build();
 
                 learningEngineService.learnAsync(event);
@@ -327,12 +355,35 @@ public class PersonalQuestService {
                                 analysis.getDifficulty()
                         );
 
+                        // 학생 계수 조회
+                        Double globalFactor = 1.0;
+                        Double difficultyFactor = 1.0;
+
+                        StudentsFactors studentFactors = studentsFactorsRepository.findByStudent(student)
+                                .orElse(null);
+
+                        if (studentFactors != null) {
+                            globalFactor = studentFactors.getGlobalFactor();
+
+                            // 해당 난이도의 계수 조회
+                            Integer difficultyValue = mapDifficultyToInt(analysis.getDifficulty());
+                            StudentsQuestFactors questFactors = studentsQuestFactorsRepository
+                                    .findByStudentFactorAndDifficulty(studentFactors, difficultyValue)
+                                    .orElse(null);
+
+                            if (questFactors != null) {
+                                difficultyFactor = questFactors.getFactorValue();
+                            }
+                        }
+
                         return AIRecommendResponse.RecommendationInfo.builder()
                                 .studentId(student.getMemberId())
                                 .studentName(student.getMember() != null ? student.getMember().getRealName() : "알 수 없음")
                                 .recommendedCoral(personalizedReward.getCoral())
                                 .recommendedResearchData(personalizedReward.getExplorationData())
                                 .reason(analysis.getAnalysisReason())
+                                .globalFactor(globalFactor)
+                                .difficultyFactor(difficultyFactor)
                                 .build();
                     })
                     .collect(Collectors.toList());
@@ -368,6 +419,19 @@ public class PersonalQuestService {
             case 4 -> QuestDifficulty.HARD;
             case 5 -> QuestDifficulty.VERY_HARD;
             default -> QuestDifficulty.MEDIUM;
+        };
+    }
+
+    /**
+     * QuestDifficulty Enum을 Integer로 변환
+     */
+    private Integer mapDifficultyToInt(QuestDifficulty difficulty) {
+        return switch (difficulty) {
+            case EASY -> 1;
+            case BASIC -> 2;
+            case MEDIUM -> 3;
+            case HARD -> 4;
+            case VERY_HARD -> 5;
         };
     }
 

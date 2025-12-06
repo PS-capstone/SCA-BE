@@ -168,12 +168,40 @@ public class LearningEngineService {
     }
 
     /**
+     * 시그모이드 변환을 사용한 actualRatio 정규화
+     * actualRatio를 FACTOR_MIN ~ FACTOR_MAX 범위로 부드럽게 매핑
+     *
+     * - actualRatio = 1.0 → 1.0 (중립)
+     * - actualRatio > 1.0 → FACTOR_MAX (1.2)에 근접
+     * - actualRatio < 1.0 → FACTOR_MIN (0.8)에 근접
+     *
+     * @param actualRatio 실제 비율 (teacherReward / aiReward)
+     * @return 변환된 계수 값 (0.8 ~ 1.2 범위)
+     */
+    private double transformActualRatio(double actualRatio) {
+        // 1.0으로부터의 차이 계산
+        double delta = actualRatio - 1.0;
+
+        // tanh를 사용한 부드러운 변환 (출력 범위: -1 ~ 1)
+        // 스케일링 계수 2.0으로 민감도 조절
+        double normalized = Math.tanh(delta * 2.0);
+
+        // FACTOR_MIN ~ FACTOR_MAX 범위로 매핑
+        double range = AIConstants.FACTOR_MAX - AIConstants.FACTOR_MIN;  // 0.4
+        double midpoint = (AIConstants.FACTOR_MAX + AIConstants.FACTOR_MIN) / 2.0;  // 1.0
+
+        // midpoint(1.0) + normalized * (range/2) = 1.0 + normalized * 0.2
+        return midpoint + normalized * (range / 2.0);
+    }
+
+    /**
      * 4. 계수 업데이트 (EMA)
      * PDF 3.3 Step 5 참고
      *
-     * newGlobal = α × actualRatio + (1-α) × oldGlobal
-     * newQuest = α × actualRatio + (1-α) × oldQuest
-     * 범위 제한: 0.5 ~ 1.5
+     * transformedRatio = sigmoid(actualRatio)
+     * newGlobal = α × transformedRatio + (1-α) × oldGlobal
+     * newQuest = α × transformedRatio + (1-α) × oldQuest
+     * 범위: 0.8 ~ 1.2 (sigmoid 변환으로 자동 보장)
      *
      * @param event 학습 이벤트
      * @param modificationRate 수정률
@@ -212,11 +240,14 @@ public class LearningEngineService {
         double actualRatio = coralRatio * AIConstants.CORAL_REWARD_WEIGHT
                 + researchRatio * AIConstants.EXPLORATION_REWARD_WEIGHT;
 
-        // EMA 적용
-        double newGlobalFactor = learningRate * actualRatio + (1 - learningRate) * oldGlobalFactor;
-        double newQuestFactor = learningRate * actualRatio + (1 - learningRate) * oldQuestFactor;
+        // 시그모이드 변환 적용
+        double transformedRatio = transformActualRatio(actualRatio);
 
-        // 범위 제한 (0.5 ~ 1.5)
+        // EMA 적용 (변환된 비율 사용)
+        double newGlobalFactor = learningRate * transformedRatio + (1 - learningRate) * oldGlobalFactor;
+        double newQuestFactor = learningRate * transformedRatio + (1 - learningRate) * oldQuestFactor;
+
+        // 시그모이드 변환으로 이미 범위가 보장되지만, 안전을 위한 최종 클램핑
         newGlobalFactor = Math.max(AIConstants.FACTOR_MIN, Math.min(AIConstants.FACTOR_MAX, newGlobalFactor));
         newQuestFactor = Math.max(AIConstants.FACTOR_MIN, Math.min(AIConstants.FACTOR_MAX, newQuestFactor));
 

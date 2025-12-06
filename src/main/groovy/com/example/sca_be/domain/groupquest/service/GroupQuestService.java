@@ -65,8 +65,8 @@ public class GroupQuestService {
                         .build(),
                 ClassInfoResponse.TemplateInfo.builder()
                         .code("EXAM")
-                        .name("학교 시험 참수")
-                        .description("학교 시험 참여 일력")
+                        .name("학교 시험 점수")
+                        .description("학교 시험 참여 입력")
                         .build(),
                 ClassInfoResponse.TemplateInfo.builder()
                         .code("OTHER")

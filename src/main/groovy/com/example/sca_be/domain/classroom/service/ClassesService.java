@@ -59,7 +59,6 @@ public class ClassesService {
     private final GroupQuestRepository groupQuestRepository;
     private final GroupQuestProgressRepository groupQuestProgressRepository;
     private final StudentsFactorsRepository studentsFactorsRepository;
-    private final Random random = new Random();
 
     //현재 로그인한 선생님의 반 목록 조회
     public ClassListResponse getClassList() {

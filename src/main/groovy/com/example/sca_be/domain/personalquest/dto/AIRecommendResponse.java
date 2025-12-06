@@ -33,5 +33,11 @@ public class AIRecommendResponse {
         private Integer recommendedResearchData;
 
         private String reason;
+
+        @JsonProperty("global_factor")
+        private Double globalFactor;
+
+        @JsonProperty("difficulty_factor")
+        private Double difficultyFactor;
     }
 }
