@@ -12,11 +12,11 @@
 INSERT INTO fish (fish_name, grade, probability) VALUES
 -- COMMON (7개)
 ('해파리', 'COMMON', 0.10),
-('열대어', 'COMMON', 0.10),
+('나비고기', 'COMMON', 0.10),
 ('해마', 'COMMON', 0.10),
 ('복어', 'COMMON', 0.10),
-('금붕어', 'COMMON', 0.10),
 ('흰동가리', 'COMMON', 0.10),
+('클리오네', 'COMMON', 0.10),
 ('구피', 'COMMON', 0.10),
 -- RARE (4개)
 ('바다거북', 'RARE', 0.0625),
@@ -25,7 +25,7 @@ INSERT INTO fish (fish_name, grade, probability) VALUES
 ('전기뱀장어', 'RARE', 0.0625),
 -- LEGENDARY (2개)
 ('바다해룡', 'LEGENDARY', 0.025),
-('리바이어던', 'LEGENDARY', 0.025);
+('리바이어던', 'LEGENDARY', 0.025)
 
 -- 2. Members (User Base Info) - 3 Teachers, 10 Students
 -- member_id is auto-generated
