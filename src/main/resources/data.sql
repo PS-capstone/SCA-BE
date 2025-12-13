@@ -25,7 +25,7 @@ INSERT INTO fish (fish_name, grade, probability) VALUES
 ('전기뱀장어', 'RARE', 0.0625),
 -- LEGENDARY (2개)
 ('바다해룡', 'LEGENDARY', 0.025),
-('리바이어던', 'LEGENDARY', 0.025)
+('리바이어던', 'LEGENDARY', 0.025);
 
 -- 2. Members (User Base Info) - 3 Teachers, 10 Students
 -- member_id is auto-generated
